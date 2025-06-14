@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { FeedbackSystem } from '@/components/FeedbackSystem';
 import { 
   CheckCircle, 
   Clock, 
@@ -14,7 +15,8 @@ import {
   RotateCcw,
   AlertCircle,
   Target,
-  Lightbulb
+  Lightbulb,
+  MessageSquare
 } from 'lucide-react';
 
 interface Solution {
@@ -36,11 +38,23 @@ interface SolutionDisplayProps {
 }
 
 export const SolutionDisplay = ({ solutions, extractedText, contextData, onStartOver }: SolutionDisplayProps) => {
-  const [feedback, setFeedback] = useState<{[key: number]: 'helpful' | 'not-helpful' | null}>({});
+  const [quickFeedback, setQuickFeedback] = useState<{[key: number]: 'helpful' | 'not-helpful' | null}>({});
   const [completedSteps, setCompletedSteps] = useState<{[key: string]: boolean}>({});
+  const [showDetailedFeedback, setShowDetailedFeedback] = useState<{[key: number]: boolean}>({});
+  const [submittedFeedback, setSubmittedFeedback] = useState<{[key: number]: boolean}>({});
 
-  const handleFeedback = (solutionId: number, type: 'helpful' | 'not-helpful') => {
-    setFeedback(prev => ({ ...prev, [solutionId]: type }));
+  const handleQuickFeedback = (solutionId: number, type: 'helpful' | 'not-helpful') => {
+    setQuickFeedback(prev => ({ ...prev, [solutionId]: type }));
+  };
+
+  const toggleDetailedFeedback = (solutionId: number) => {
+    setShowDetailedFeedback(prev => ({ ...prev, [solutionId]: !prev[solutionId] }));
+  };
+
+  const handleFeedbackSubmitted = (solutionId: number, feedback: any) => {
+    console.log('Detailed feedback submitted for solution', solutionId, feedback);
+    setSubmittedFeedback(prev => ({ ...prev, [solutionId]: true }));
+    setShowDetailedFeedback(prev => ({ ...prev, [solutionId]: false }));
   };
 
   const toggleStep = (stepKey: string) => {
@@ -112,7 +126,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
       </Card>
 
       {/* Solutions */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {solutions.map((solution, index) => (
           <Card key={solution.id} className={`${index === 0 ? 'border-blue-200 bg-blue-50' : ''}`}>
             <CardHeader>
@@ -184,26 +198,50 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
                 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Was this solution helpful?</span>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant={feedback[solution.id] === 'helpful' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleFeedback(solution.id, 'helpful')}
-                    >
-                      <ThumbsUp className="w-4 h-4 mr-1" />
-                      Helpful
-                    </Button>
-                    <Button
-                      variant={feedback[solution.id] === 'not-helpful' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleFeedback(solution.id, 'not-helpful')}
-                    >
-                      <ThumbsDown className="w-4 h-4 mr-1" />
-                      Not Helpful
-                    </Button>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">Was this solution helpful?</span>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant={quickFeedback[solution.id] === 'helpful' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleQuickFeedback(solution.id, 'helpful')}
+                      >
+                        <ThumbsUp className="w-4 h-4 mr-1" />
+                        Helpful
+                      </Button>
+                      <Button
+                        variant={quickFeedback[solution.id] === 'not-helpful' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleQuickFeedback(solution.id, 'not-helpful')}
+                      >
+                        <ThumbsDown className="w-4 h-4 mr-1" />
+                        Not Helpful
+                      </Button>
+                    </div>
                   </div>
+
+                  {!submittedFeedback[solution.id] && (
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleDetailedFeedback(solution.id)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        {showDetailedFeedback[solution.id] ? 'Hide' : 'Provide'} Detailed Feedback
+                      </Button>
+                    </div>
+                  )}
+
+                  {showDetailedFeedback[solution.id] && !submittedFeedback[solution.id] && (
+                    <FeedbackSystem
+                      solutionId={solution.id}
+                      solutionTitle={solution.title}
+                      onFeedbackSubmitted={(feedback) => handleFeedbackSubmitted(solution.id, feedback)}
+                    />
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -228,6 +266,12 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
                   {solutions.length}
                 </div>
                 <div className="text-sm text-green-600">Solutions Available</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-700">
+                  {Object.values(submittedFeedback).filter(Boolean).length}
+                </div>
+                <div className="text-sm text-green-600">Feedback Provided</div>
               </div>
             </div>
           </div>
