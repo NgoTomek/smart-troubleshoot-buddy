@@ -6,6 +6,9 @@ import { SolutionList } from '@/components/SolutionList';
 import { ProgressSummary } from '@/components/ProgressSummary';
 import { SolutionInsights } from '@/components/SolutionInsights';
 import { QuickActions } from '@/components/QuickActions';
+import { AnalysisDashboard } from '@/components/AnalysisDashboard';
+import { SessionExport } from '@/components/SessionExport';
+import { SolutionCategories } from '@/components/SolutionCategories';
 import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
@@ -52,11 +55,20 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         contextData={contextData} 
       />
 
-      <SolutionInsights 
+      <AnalysisDashboard 
         solutions={solutions}
-        completedSteps={completedSteps}
-        quickFeedback={quickFeedback}
+        extractedText={extractedText}
       />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SolutionInsights 
+          solutions={solutions}
+          completedSteps={completedSteps}
+          quickFeedback={quickFeedback}
+        />
+        
+        <SolutionCategories solutions={solutions} />
+      </div>
 
       <QuickActions />
 
@@ -73,11 +85,21 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         problemContext={problemContext}
       />
 
-      <ProgressSummary
-        completedSteps={completedSteps}
-        solutionsCount={solutions.length}
-        submittedFeedback={submittedFeedback}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ProgressSummary
+          completedSteps={completedSteps}
+          solutionsCount={solutions.length}
+          submittedFeedback={submittedFeedback}
+        />
+        
+        <SessionExport
+          solutions={solutions}
+          extractedText={extractedText}
+          contextData={contextData}
+          completedSteps={completedSteps}
+          quickFeedback={quickFeedback}
+        />
+      </div>
     </div>
   );
 };
