@@ -5,7 +5,6 @@ import { SolutionManager } from '@/components/SolutionManager';
 import { ProgressSummary } from '@/components/ProgressSummary';
 import { SolutionInsights } from '@/components/SolutionInsights';
 import { QuickActions } from '@/components/QuickActions';
-import { AnalysisDashboard } from '@/components/AnalysisDashboard';
 import { SessionExport } from '@/components/SessionExport';
 import { SolutionCategories } from '@/components/SolutionCategories';
 import { SolutionRecommendationEngine } from '@/components/SolutionRecommendationEngine';
@@ -13,23 +12,12 @@ import { SmartDiagnostics } from '@/components/SmartDiagnostics';
 import { CommunitySolutions } from '@/components/CommunitySolutions';
 import { SolutionEffectivenessTracker } from '@/components/SolutionEffectivenessTracker';
 import { CollaborationPanel } from '@/components/CollaborationPanel';
-import { AIInsightsEngine } from '@/components/AIInsightsEngine';
-import { PerformanceMonitor } from '@/components/PerformanceMonitor';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
 import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { useSolutionState } from '@/hooks/useSolutionState';
 import { WorkflowManager } from './WorkflowManager';
-
-interface Solution {
-  id: number;
-  title: string;
-  confidence: number;
-  category: string;
-  steps: string[];
-  estimatedTime: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  successRate: number;
-}
+import { Solution } from '@/types/solution';
+import { AnalyticsSection } from './AnalyticsSection';
 
 interface SolutionDisplayProps {
   solutions: Solution[];
@@ -102,19 +90,11 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
       </div>
 
       {/* Enhanced Analytics Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <AnalysisDashboard 
-          solutions={solutions}
-          extractedText={extractedText}
-        />
-        
-        <AIInsightsEngine
-          problemContext={problemContext}
-          solutions={solutions}
-        />
-
-        <PerformanceMonitor />
-      </div>
+      <AnalyticsSection
+        solutions={solutions}
+        extractedText={extractedText}
+        problemContext={problemContext}
+      />
 
       {/* Collaboration and Diagnostics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

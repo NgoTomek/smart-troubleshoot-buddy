@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,23 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SolutionList } from '@/components/SolutionList';
 import { SolutionComparison } from '@/components/SolutionComparison';
 import { SolutionFilters } from '@/components/SolutionFilters';
+import { Solution } from '@/types/solution';
 import { 
   GitCompare, 
   List, 
   Filter,
   BarChart3
 } from 'lucide-react';
-
-interface Solution {
-  id: number;
-  title: string;
-  confidence: number;
-  category: string;
-  steps: string[];
-  estimatedTime: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  successRate: number;
-}
 
 interface FilterOptions {
   difficulty: string[];
