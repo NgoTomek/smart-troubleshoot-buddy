@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -11,6 +10,11 @@ import { generateWorkflowMetrics } from '@/lib/analytics';
 import { WorkflowTabs } from './WorkflowTabs';
 import { AIAssistant } from './AIAssistant';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
+import { WorkflowOnboarding } from './WorkflowOnboarding';
+import { EnhancedStepIndicator } from './EnhancedStepIndicator';
+import { WorkflowSearchFilter } from './WorkflowSearchFilter';
+import { ContextualHelp } from './ContextualHelp';
+import { EnhancedActionPanel } from './EnhancedActionPanel';
 
 interface TroubleshootingWorkflowProps {
   workflowSteps: WorkflowStep[];
@@ -35,6 +39,14 @@ export const TroubleshootingWorkflow = ({
   getAnalytics,
   stepDurations,
 }: TroubleshootingWorkflowProps) => {
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [filteredSteps, setFilteredSteps] = useState(workflowSteps);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [helpStepId, setHelpStepId] = useState<string | null>(null);
+  const [validationProgress, setValidationProgress] = useState(0);
+  const [isValidating, setIsValidating] = useState(false);
+  const [lastActionResult, setLastActionResult] = useState<'success' | 'error' | 'warning' | null>(null);
+
   const {
     stepHistory,
     insights,
@@ -73,6 +85,57 @@ export const TroubleshootingWorkflow = ({
     handleSaveAsTemplate(name, '');
   };
 
+  const handleStartWorkflow = () => {
+    setShowOnboarding(false);
+  };
+
+  const handleValidateStep = async () => {
+    setIsValidating(true);
+    setValidationProgress(0);
+    
+    // Simulate validation progress
+    const interval = setInterval(() => {
+      setValidationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 20;
+      });
+    }, 300);
+
+    try {
+      const result = await validateStep(currentStep);
+      setLastActionResult(result ? 'success' : 'error');
+    } catch (error) {
+      setLastActionResult('error');
+    } finally {
+      setIsValidating(false);
+      setTimeout(() => setLastActionResult(null), 5000);
+    }
+  };
+
+  const handleAdvanceStep = async () => {
+    try {
+      const success = await handleStepAdvance(currentStep);
+      setLastActionResult(success ? 'success' : 'error');
+    } catch (error) {
+      setLastActionResult('error');
+    }
+  };
+
+  const currentStepData = workflowSteps.find(s => s.id === currentStep);
+  const currentStepIndex = workflowSteps.findIndex(s => s.id === currentStep);
+
+  if (showOnboarding) {
+    return (
+      <WorkflowOnboarding 
+        onStart={handleStartWorkflow}
+        onDismiss={() => setShowOnboarding(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
@@ -80,14 +143,14 @@ export const TroubleshootingWorkflow = ({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Target className="w-5 h-5 text-indigo-600" />
-              <span>Advanced Troubleshooting Workflow</span>
+              <span>Smart Troubleshooting Workflow</span>
             </div>
             <Badge variant="outline" className="bg-indigo-100 text-indigo-700">
               {analytics.progressPercent}% Complete
             </Badge>
           </CardTitle>
           <p className="text-sm text-indigo-700">
-            Follow this intelligent workflow to systematically resolve your issue with validation and insights.
+            AI-powered step-by-step troubleshooting with intelligent validation and insights.
           </p>
         </CardHeader>
         
@@ -109,6 +172,74 @@ export const TroubleshootingWorkflow = ({
               }
             }}
           />
+          
+          <Separator />
+
+          {/* Search and Filter */}
+          <WorkflowSearchFilter
+            steps={workflowSteps}
+            onFilteredSteps={setFilteredSteps}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
+          
+          <Separator />
+
+          {/* Enhanced Step Display */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="font-semibold text-slate-800 flex items-center space-x-2">
+                <span>Workflow Steps</span>
+                <Badge variant="outline">{filteredSteps.length} of {workflowSteps.length}</Badge>
+              </h3>
+              
+              <div className="space-y-3">
+                {filteredSteps.map((step, index) => (
+                  <EnhancedStepIndicator
+                    key={step.id}
+                    step={step}
+                    isActive={step.id === currentStep}
+                    isCompleted={step.status === 'completed'}
+                    stepNumber={workflowSteps.findIndex(s => s.id === step.id) + 1}
+                    totalSteps={workflowSteps.length}
+                    onStepClick={() => onNavigate(step.id)}
+                    onHelp={() => setHelpStepId(step.id)}
+                    estimatedTime={step.estimatedTime}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Enhanced Action Panel */}
+              <EnhancedActionPanel
+                currentStepId={currentStep}
+                currentStepTitle={currentStepData?.title || ''}
+                canAdvance={currentStepData?.status === 'active'}
+                canSkip={currentStepData?.optional || false}
+                isValidating={isValidating}
+                validationProgress={validationProgress}
+                onAdvance={handleAdvanceStep}
+                onSkip={() => handleStepSkip(currentStep)}
+                onRestart={() => onNavigate('analyze')}
+                onHelp={() => setHelpStepId(currentStep)}
+                onValidate={handleValidateStep}
+                estimatedTime={currentStepData?.estimatedTime}
+                lastActionResult={lastActionResult}
+              />
+
+              {/* Contextual Help */}
+              {helpStepId && (
+                <div className="relative">
+                  <ContextualHelp
+                    stepId={helpStepId}
+                    stepTitle={workflowSteps.find(s => s.id === helpStepId)?.title || ''}
+                    onClose={() => setHelpStepId(null)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
           
           <Separator />
           
