@@ -12,18 +12,10 @@ import {
   Clock,
   Zap
 } from 'lucide-react';
-
-interface WorkflowInsight {
-  id: string;
-  type: 'tip' | 'warning' | 'optimization' | 'achievement';
-  title: string;
-  description: string;
-  actionable: boolean;
-  priority: 'low' | 'medium' | 'high';
-}
+import { Insight } from '@/components/workflow-tabs/InsightsTabContent';
 
 interface WorkflowInsightsProps {
-  insights: WorkflowInsight[];
+  insights: Insight[];
   currentStepId: string;
   progressPercent: number;
   averageStepTime: number;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,15 +11,7 @@ import {
   RotateCcw,
   Eye
 } from 'lucide-react';
-
-interface HistoryEntry {
-  stepId: string;
-  stepTitle: string;
-  status: 'completed' | 'failed' | 'skipped';
-  timestamp: Date;
-  duration: number;
-  notes?: string;
-}
+import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
 
 interface WorkflowStepHistoryProps {
   history: HistoryEntry[];

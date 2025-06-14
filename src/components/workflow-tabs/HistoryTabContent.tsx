@@ -5,7 +5,7 @@ import { WorkflowStepHistory } from '@/components/WorkflowStepHistory';
 export interface HistoryEntry {
   stepId: string;
   stepTitle: string;
-  status: 'completed' | 'skipped';
+  status: 'completed' | 'skipped' | 'failed';
   timestamp: Date;
   duration: number;
 }
