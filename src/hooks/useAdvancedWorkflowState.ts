@@ -1,11 +1,13 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateWorkflowAnalytics } from '@/lib/analytics';
 import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 import { getInitialWorkflowSteps } from '@/config/workflowConfig';
-import { useWorkflowValidation } from './useWorkflowValidation';
+import { useWorkflowValidationSimple } from './useWorkflowValidationSimple';
 import { useWorkflowTimers } from './useWorkflowTimers';
 import { useWorkflowNavigation } from './useWorkflowNavigation';
+import { useWorkflowStepOperations } from './useWorkflowStepOperations';
 
 export type { WorkflowStep, WorkflowAnalytics };
 
@@ -15,18 +17,9 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
   const [viewedStepId, setViewedStepId] = useState(initialStep);
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>(getInitialWorkflowSteps(initialStep));
   
-  const { validationErrors, validateStep } = useWorkflowValidation(workflowSteps);
+  const { validationErrors, validateStep } = useWorkflowValidationSimple();
   const { stepDurations, startStepTimer, endStepTimer } = useWorkflowTimers();
-
-  const canAdvanceToStep = useCallback((stepId: string): boolean => {
-    const step = workflowSteps.find(s => s.id === stepId);
-    if (!step?.requirements) return true;
-
-    return step.requirements.every(reqId => {
-      const reqStep = workflowSteps.find(s => s.id === reqId);
-      return reqStep?.status === 'completed';
-    });
-  }, [workflowSteps]);
+  const { updateStepStatus, canAdvanceToStep, skipStep, markStepFailed } = useWorkflowStepOperations(workflowSteps, setWorkflowSteps);
 
   const { navigateToStep: canNavigateToStep } = useWorkflowNavigation(workflowSteps, canAdvanceToStep);
 
@@ -73,17 +66,9 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
     endStepTimer(activeStepId);
 
     // Update step statuses
-    setWorkflowSteps(prev => prev.map(s => {
-      if (s.id === activeStepId) {
-        return { ...s, status: 'completed' as const };
-      }
-      if (s.id === stepId && activeStepId !== stepId) {
-        return { ...s, status: 'active' as const };
-      }
-      return s;
-    }));
-
     if (activeStepId !== stepId) {
+      updateStepStatus(activeStepId, 'completed');
+      updateStepStatus(stepId, 'active');
       setActiveStepId(stepId);
       setViewedStepId(stepId);
       startStepTimer(stepId);
@@ -94,7 +79,7 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
         duration: 3000,
       });
     } else {
-       toast({
+      toast({
         title: "Workflow Complete!",
         description: "You have completed all the steps.",
         duration: 4000
@@ -102,45 +87,7 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
     }
 
     return true;
-  }, [activeStepId, workflowSteps, canAdvanceToStep, validateStep, toast, endStepTimer, startStepTimer]);
-
-  const skipStep = useCallback((stepId: string) => {
-    const step = workflowSteps.find(s => s.id === stepId);
-    if (!step?.optional) {
-      toast({
-        title: "Cannot Skip",
-        description: "This step is required and cannot be skipped.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return false;
-    }
-
-    setWorkflowSteps(prev => prev.map(s => 
-      s.id === stepId ? { ...s, status: 'skipped' as const } : s
-    ));
-
-    toast({
-      title: "Step Skipped",
-      description: `Skipped: ${step.title}`,
-      duration: 2000,
-    });
-
-    return true;
-  }, [workflowSteps, toast]);
-
-  const markStepFailed = useCallback((stepId: string, reason?: string) => {
-    setWorkflowSteps(prev => prev.map(s => 
-      s.id === stepId ? { ...s, status: 'failed' as const } : s
-    ));
-
-    toast({
-      title: "Step Failed",
-      description: reason || "The step could not be completed.",
-      variant: "destructive",
-      duration: 4000,
-    });
-  }, [toast]);
+  }, [activeStepId, workflowSteps, canAdvanceToStep, validateStep, toast, endStepTimer, startStepTimer, updateStepStatus]);
 
   const getAnalytics = useCallback((): WorkflowAnalytics => {
     return generateWorkflowAnalytics(workflowSteps, stepDurations);
