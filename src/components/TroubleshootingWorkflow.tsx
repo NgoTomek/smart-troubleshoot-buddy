@@ -35,7 +35,6 @@ export const TroubleshootingWorkflow = ({
   getAnalytics,
   stepDurations,
 }: TroubleshootingWorkflowProps) => {
-
   const {
     stepHistory,
     insights,
@@ -70,14 +69,12 @@ export const TroubleshootingWorkflow = ({
     stepDurations,
   });
 
-  // Wrapper function to handle the parameter mismatch
   const handleSaveTemplate = (name: string) => {
-    handleSaveAsTemplate(name, ''); // Provide empty description as default
+    handleSaveAsTemplate(name, '');
   };
 
   return (
     <div className="space-y-6">
-      {/* Main Workflow Card */}
       <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -95,7 +92,6 @@ export const TroubleshootingWorkflow = ({
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {/* Enhanced Navigation */}
           <WorkflowBreadcrumbNav
             steps={workflowSteps}
             currentStepId={currentStep}
@@ -116,7 +112,6 @@ export const TroubleshootingWorkflow = ({
           
           <Separator />
           
-          {/* Enhanced Tabbed Interface */}
           <WorkflowTabs
             analytics={analytics}
             currentStep={currentStep}
@@ -150,7 +145,6 @@ export const TroubleshootingWorkflow = ({
           
           <Separator />
           
-          {/* AI Assistant */}
           <AIAssistant onQuickAction={handleQuickAction} />
         </CardContent>
       </Card>
