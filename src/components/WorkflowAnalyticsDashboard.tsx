@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowAnalytics } from '@/types/workflow';
 import { AnalyticsOverview } from './analytics-dashboard/AnalyticsOverview';
 import { CurrentStepDurationChart } from './analytics-dashboard/CurrentStepDurationChart';
 import { StatusDistributionChart } from './analytics-dashboard/StatusDistributionChart';

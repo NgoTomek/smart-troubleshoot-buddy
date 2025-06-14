@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep } from '@/types/workflow';
 import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
 
 export const useWorkflowActions = ({

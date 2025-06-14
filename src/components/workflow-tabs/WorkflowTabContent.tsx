@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { WorkflowProgressTracker } from '@/components/WorkflowProgressTracker';
 import { WorkflowQuickActions } from '@/components/WorkflowQuickActions';
 import { WorkflowStepValidator } from '@/components/WorkflowStepValidator';
 import { WorkflowStepTimer } from '@/components/WorkflowStepTimer';
-import { WorkflowAnalytics, WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowAnalytics, WorkflowStep } from '@/types/workflow';
 
 interface WorkflowTabContentProps {
   analytics: WorkflowAnalytics;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -10,7 +9,7 @@ import {
   TemplatesTabContent,
   WorkflowTabContent
 } from './workflow-tabs';
-import { WorkflowAnalytics, WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowAnalytics, WorkflowStep } from '@/types/workflow';
 import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
 import { Insight } from '@/components/workflow-tabs/InsightsTabContent';
 import { Notification } from '@/components/workflow-tabs/NotificationsTabContent';

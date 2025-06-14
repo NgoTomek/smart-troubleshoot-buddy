@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { WorkflowInsights } from '@/components/WorkflowInsights';
-import { WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowAnalytics } from '@/types/workflow';
 
 export interface Insight {
   id: string;

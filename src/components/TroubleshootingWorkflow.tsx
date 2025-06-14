@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Target } from 'lucide-react';
-import { WorkflowStep, WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 import { useWorkflowTabsState } from '@/hooks/useWorkflowTabsState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
 import { generateWorkflowMetrics } from '@/lib/analytics';

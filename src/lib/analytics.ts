@@ -1,5 +1,6 @@
+
 import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
-import { WorkflowStep, WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 
 interface StepCompletionTime {
   name: string;

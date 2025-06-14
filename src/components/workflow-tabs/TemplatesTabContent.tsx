@@ -2,7 +2,7 @@
 import React from 'react';
 import { WorkflowTemplateManager } from '@/components/WorkflowTemplateManager';
 import { WorkflowExportImport } from '@/components/WorkflowExportImport';
-import { WorkflowStep, WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 
 interface TemplatesTabContentProps {
   workflowSteps: WorkflowStep[];
