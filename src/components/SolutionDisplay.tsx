@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
@@ -102,7 +101,6 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         <TroubleshootingWorkflow
           currentStep={currentWorkflowStep}
           onStepChange={handleWorkflowStepChange}
-          problemContext={problemContext}
         />
         
         <SolutionQualityAssessment
