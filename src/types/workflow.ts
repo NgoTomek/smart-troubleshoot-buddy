@@ -13,6 +13,8 @@ export interface WorkflowStep {
   status: 'pending' | 'active' | 'completed' | 'skipped' | 'failed';
   estimatedTime: string;
   optional: boolean;
+  priority?: 'high' | 'medium' | 'low';
+  difficulty?: 'easy' | 'medium' | 'hard';
   requirements?: string[];
   validationRules?: WorkflowValidationRule[];
   category: 'analysis' | 'solution' | 'execution' | 'collaboration' | 'feedback';
