@@ -11,7 +11,18 @@ import {
   X,
   Trash2
 } from 'lucide-react';
-import { Notification } from '@/components/workflow-tabs/NotificationsTabContent';
+
+interface Notification {
+  id: string;
+  type: 'success' | 'warning' | 'info' | 'reminder';
+  title: string;
+  message: string;
+  timestamp: Date;
+  action?: {
+    label: string;
+    handler: () => void;
+  };
+}
 
 interface WorkflowNotificationsProps {
   notifications: Notification[];

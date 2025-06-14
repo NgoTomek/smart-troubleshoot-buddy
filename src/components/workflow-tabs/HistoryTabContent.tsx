@@ -6,8 +6,8 @@ export interface HistoryEntry {
   stepId: string;
   stepTitle: string;
   status: 'completed' | 'skipped' | 'failed';
-  timestamp: Date;
   duration: number;
+  timestamp: Date;
   notes?: string;
 }
 
@@ -17,7 +17,11 @@ interface HistoryTabContentProps {
   onClearHistory: () => void;
 }
 
-export const HistoryTabContent = ({ history, onRevisitStep, onClearHistory }: HistoryTabContentProps) => {
+export const HistoryTabContent = ({
+  history,
+  onRevisitStep,
+  onClearHistory,
+}: HistoryTabContentProps) => {
   return (
     <WorkflowStepHistory
       history={history}

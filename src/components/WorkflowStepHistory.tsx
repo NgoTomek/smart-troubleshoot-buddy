@@ -5,7 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Clock, CheckCircle, XCircle, SkipForward, RotateCcw, Eye } from 'lucide-react';
-import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
+
+interface HistoryEntry {
+  stepId: string;
+  stepTitle: string;
+  status: 'completed' | 'skipped' | 'failed';
+  duration: number;
+  timestamp: Date;
+  notes?: string;
+}
 
 interface WorkflowStepHistoryProps {
   history: HistoryEntry[];

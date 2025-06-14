@@ -4,7 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, AlertTriangle, Zap, Trophy, TrendingUp, Clock } from 'lucide-react';
-import { Insight } from '@/components/workflow-tabs/InsightsTabContent';
+
+interface Insight {
+  id: string;
+  type: 'tip' | 'warning' | 'optimization' | 'achievement';
+  title: string;
+  description: string;
+  actionable: boolean;
+  priority: 'high' | 'medium' | 'low';
+}
 
 interface WorkflowInsightsProps {
   insights: Insight[];

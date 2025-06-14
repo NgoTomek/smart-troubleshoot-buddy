@@ -9,7 +9,7 @@ export interface Insight {
   title: string;
   description: string;
   actionable: boolean;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'high' | 'medium' | 'low';
 }
 
 interface InsightsTabContentProps {
@@ -19,7 +19,12 @@ interface InsightsTabContentProps {
   onApplyInsight: (id: string) => void;
 }
 
-export const InsightsTabContent = ({ insights, currentStep, analytics, onApplyInsight }: InsightsTabContentProps) => {
+export const InsightsTabContent = ({
+  insights,
+  currentStep,
+  analytics,
+  onApplyInsight,
+}: InsightsTabContentProps) => {
   return (
     <WorkflowInsights
       insights={insights}

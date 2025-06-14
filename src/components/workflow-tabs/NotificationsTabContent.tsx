@@ -8,13 +8,10 @@ export interface Notification {
   title: string;
   message: string;
   timestamp: Date;
-  actionable: boolean;
-  autoHide?: boolean;
   action?: {
     label: string;
     handler: () => void;
   };
-  duration?: number;
 }
 
 interface NotificationsTabContentProps {
@@ -23,7 +20,11 @@ interface NotificationsTabContentProps {
   onDismissAll: () => void;
 }
 
-export const NotificationsTabContent = ({ notifications, onDismiss, onDismissAll }: NotificationsTabContentProps) => {
+export const NotificationsTabContent = ({
+  notifications,
+  onDismiss,
+  onDismissAll,
+}: NotificationsTabContentProps) => {
   return (
     <WorkflowNotifications
       notifications={notifications}
