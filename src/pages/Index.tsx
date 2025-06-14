@@ -5,7 +5,6 @@ import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { MainNavigation } from '@/components/MainNavigation';
-import { TroubleshootingTabContent } from '@/components/TroubleshootingTabContent';
 import { ViewLayout } from '@/components/ViewLayout';
 import { useAppState } from '@/hooks/useAppState';
 
@@ -41,8 +40,7 @@ const Index = () => {
         {!hasResults ? (
           <>
             <HeroSection />
-            <MainNavigation onViewChange={setCurrentView} />
-            <TroubleshootingTabContent onAnalysisComplete={handleAnalysisComplete} />
+            <MainNavigation onViewChange={setCurrentView} onAnalysisComplete={handleAnalysisComplete} />
           </>
         ) : (
           <div className="max-w-6xl mx-auto px-4 py-8">

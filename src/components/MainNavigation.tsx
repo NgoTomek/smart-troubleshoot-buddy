@@ -1,13 +1,15 @@
 
 import React from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { BarChart3, HelpCircle, Bookmark, Wrench } from 'lucide-react';
+import { TroubleshootingWorkflowSection } from '@/components/TroubleshootingWorkflowSection';
 
 interface MainNavigationProps {
   onViewChange: (view: 'main' | 'faq' | 'stats' | 'saved' | 'tools') => void;
+  onAnalysisComplete: (context: any, extractedText: string) => void;
 }
 
-export const MainNavigation = ({ onViewChange }: MainNavigationProps) => {
+export const MainNavigation = ({ onViewChange, onAnalysisComplete }: MainNavigationProps) => {
   return (
     <div className="max-w-4xl mx-auto px-4 mb-8">
       <Tabs defaultValue="troubleshoot" className="w-full">
@@ -30,6 +32,10 @@ export const MainNavigation = ({ onViewChange }: MainNavigationProps) => {
             Statistics
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="troubleshoot" className="space-y-8 mt-8">
+          <TroubleshootingWorkflowSection onAnalysisComplete={onAnalysisComplete} />
+        </TabsContent>
       </Tabs>
     </div>
   );
