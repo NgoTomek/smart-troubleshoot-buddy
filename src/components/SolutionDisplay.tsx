@@ -13,6 +13,9 @@ import { SolutionRecommendationEngine } from '@/components/SolutionRecommendatio
 import { SmartDiagnostics } from '@/components/SmartDiagnostics';
 import { CommunitySolutions } from '@/components/CommunitySolutions';
 import { SolutionEffectivenessTracker } from '@/components/SolutionEffectivenessTracker';
+import { CollaborationPanel } from '@/components/CollaborationPanel';
+import { AIInsightsEngine } from '@/components/AIInsightsEngine';
+import { PerformanceMonitor } from '@/components/PerformanceMonitor';
 import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
@@ -66,6 +69,10 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     console.log('Effectiveness data updated:', data);
   };
 
+  const handleInviteTeam = () => {
+    console.log('Inviting team members to collaboration session');
+  };
+
   return (
     <div className="space-y-6">
       <SolutionHeader onStartOver={onStartOver} />
@@ -75,10 +82,26 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         contextData={contextData} 
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Enhanced Analytics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AnalysisDashboard 
           solutions={solutions}
           extractedText={extractedText}
+        />
+        
+        <AIInsightsEngine
+          problemContext={problemContext}
+          solutions={solutions}
+        />
+
+        <PerformanceMonitor />
+      </div>
+
+      {/* Collaboration and Diagnostics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CollaborationPanel
+          problemContext={problemContext}
+          onInviteTeam={handleInviteTeam}
         />
         
         <SmartDiagnostics
