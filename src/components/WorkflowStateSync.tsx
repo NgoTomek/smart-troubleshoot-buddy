@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import {
   Wifi, 
   WifiOff, 
   Users, 
-  Sync,
+  RefreshCw,
   AlertCircle,
   CheckCircle,
   Clock
@@ -207,7 +206,7 @@ export const WorkflowStateSync = ({
               onClick={handleForceSync}
               disabled={isResolving}
             >
-              <Sync className={`w-4 h-4 mr-2 ${isResolving ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 mr-2 ${isResolving ? 'animate-spin' : ''}`} />
               {isResolving ? 'Syncing...' : 'Force Sync'}
             </Button>
           </div>
