@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Upload, MessageSquare, Brain, Target, CheckCircle, Users, Zap } from 'lucide-react';
+import { Home, Upload, MessageSquare, Brain, Target, CheckCircle, Users, Zap, Camera, FileText } from 'lucide-react';
 
 interface HowItWorksPageProps {
   onBackToHome: () => void;
@@ -11,43 +11,43 @@ interface HowItWorksPageProps {
 export const HowItWorksPage = ({ onBackToHome }: HowItWorksPageProps) => {
   const steps = [
     {
-      icon: Upload,
-      title: "Upload Screenshots",
-      description: "Take screenshots of your error messages, system dialogs, or problematic interfaces. Our AI automatically extracts and analyzes the text.",
+      icon: Camera,
+      title: "Upload Error Screenshots",
+      description: "Drag and drop or click to upload screenshots of your error messages, system dialogs, or problematic interfaces.",
       details: [
-        "Support for multiple image formats",
-        "Automatic text extraction using OCR",
-        "Privacy-focused processing"
+        "Support for PNG, JPG, GIF formats",
+        "Multiple images at once",
+        "Secure image processing"
+      ]
+    },
+    {
+      icon: FileText,
+      title: "AI Text Extraction",
+      description: "Our AI automatically extracts and analyzes text from your screenshots using advanced OCR technology.",
+      details: [
+        "Automatic text detection",
+        "Error code recognition",
+        "Context-aware extraction"
       ]
     },
     {
       icon: MessageSquare,
-      title: "Add Context",
-      description: "Provide additional information about when the error occurred, what you were doing, and your system environment.",
+      title: "Provide Additional Context",
+      description: "Add details about when the error occurred, what you were doing, and your system environment to help our AI better understand the problem.",
       details: [
-        "Smart categorization of context",
-        "Guided questions to gather relevant info",
-        "Optional but highly recommended"
+        "Operating system details",
+        "Application context",
+        "Steps that led to the error"
       ]
     },
     {
       icon: Brain,
-      title: "AI Analysis",
-      description: "Our advanced AI analyzes your error patterns, cross-references with our knowledge base, and identifies the most likely causes.",
+      title: "Smart AI Diagnosis",
+      description: "Our AI analyzes the extracted text and context to identify the root cause and generate targeted solutions.",
       details: [
-        "Pattern recognition algorithms",
-        "Knowledge base of 10M+ solutions",
-        "Real-time diagnostic analysis"
-      ]
-    },
-    {
-      icon: Target,
-      title: "Get Solutions",
-      description: "Receive ranked solutions based on confidence scores, success rates, and relevance to your specific situation.",
-      details: [
-        "Solutions ranked by success rate",
-        "Step-by-step instructions",
-        "Community feedback integration"
+        "Pattern recognition",
+        "Knowledge base matching",
+        "Confidence scoring"
       ]
     }
   ];
@@ -56,22 +56,22 @@ export const HowItWorksPage = ({ onBackToHome }: HowItWorksPageProps) => {
     {
       icon: Zap,
       title: "Lightning Fast",
-      description: "Get solutions in seconds, not hours"
+      description: "Get solutions in seconds with our optimized AI processing"
     },
     {
       icon: Brain,
-      title: "AI-Powered",
-      description: "Advanced machine learning for accurate diagnostics"
+      title: "AI-Powered OCR",
+      description: "Advanced text extraction from any screenshot"
     },
     {
-      icon: Users,
-      title: "Community-Driven",
-      description: "Solutions validated by thousands of users"
+      icon: Target,
+      title: "Accurate Diagnosis",
+      description: "Precise problem identification and solution matching"
     },
     {
       icon: CheckCircle,
-      title: "Proven Results",
-      description: "95% success rate for common technical issues"
+      title: "Proven Solutions",
+      description: "Curated fixes that actually work"
     }
   ];
 
@@ -93,8 +93,7 @@ export const HowItWorksPage = ({ onBackToHome }: HowItWorksPageProps) => {
           How TechFix AI Works
         </h1>
         <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-          Our AI-powered platform makes technical troubleshooting simple and effective. 
-          Here's how we turn your error screenshots into actionable solutions.
+          Our AI-powered platform simplifies technical troubleshooting by analyzing your error screenshots and providing instant solutions.
         </p>
       </div>
 
@@ -145,14 +144,14 @@ export const HowItWorksPage = ({ onBackToHome }: HowItWorksPageProps) => {
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-4">Ready to Fix Your Tech Issues?</h2>
         <p className="text-slate-600 mb-6">
-          Join thousands of users who've solved their problems with TechFix AI
+          Upload your error screenshots and get instant AI-powered solutions
         </p>
         <Button 
           size="lg" 
           onClick={onBackToHome}
           className="bg-blue-600 hover:bg-blue-700"
         >
-          Get Started Now
+          Try TechFix AI Now
         </Button>
       </div>
     </div>

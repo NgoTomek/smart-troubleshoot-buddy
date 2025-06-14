@@ -22,7 +22,7 @@ export const ViewLayout = ({ currentView, onBackToHome }: ViewLayoutProps) => {
       case 'saved':
         return <SavedSolutions onBackToHome={onBackToHome} />;
       case 'tools':
-        return <ExamplesPage onBackToHome={onBackToHome} />;
+        return <ToolsDashboard onBackToHome={onBackToHome} />;
       case 'faq':
         return <HowItWorksPage onBackToHome={onBackToHome} />;
       case 'stats':
