@@ -1,13 +1,20 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Target, Brain } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Target, Brain, History, Lightbulb, Bell, Settings } from 'lucide-react';
 import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
 import { WorkflowProgressTracker } from '@/components/WorkflowProgressTracker';
 import { WorkflowStepValidator } from '@/components/WorkflowStepValidator';
+import { WorkflowStepTimer } from '@/components/WorkflowStepTimer';
+import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
+import { WorkflowQuickActions } from '@/components/WorkflowQuickActions';
+import { WorkflowStepHistory } from '@/components/WorkflowStepHistory';
+import { WorkflowInsights } from '@/components/WorkflowInsights';
+import { WorkflowNotifications } from '@/components/WorkflowNotifications';
+import { WorkflowPreferences } from '@/components/WorkflowPreferences';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -29,12 +36,66 @@ export const TroubleshootingWorkflow = ({
     getAnalytics
   } = useAdvancedWorkflowState(currentStep);
 
+  // New state for additional features
+  const [stepHistory, setStepHistory] = useState<any[]>([]);
+  const [insights, setInsights] = useState<any[]>([
+    {
+      id: '1',
+      type: 'tip',
+      title: 'Consider automation',
+      description: 'This step could be automated for faster completion',
+      actionable: true,
+      priority: 'medium'
+    }
+  ]);
+  const [notifications, setNotifications] = useState<any[]>([
+    {
+      id: '1',
+      type: 'info',
+      title: 'Step completed',
+      message: 'Analysis step completed successfully',
+      timestamp: new Date(),
+      actionable: false,
+      autoHide: true
+    }
+  ]);
+  const [preferences, setPreferences] = useState<any[]>([
+    {
+      id: 'auto_advance',
+      category: 'automation',
+      label: 'Auto-advance steps',
+      description: 'Automatically move to next step when current step is completed',
+      type: 'boolean',
+      value: false
+    },
+    {
+      id: 'notification_sound',
+      category: 'notifications',
+      label: 'Sound notifications',
+      description: 'Play sound when notifications appear',
+      type: 'boolean',
+      value: true
+    }
+  ]);
+
   const analytics = getAnalytics();
 
   const handleStepAdvance = async (stepId: string) => {
     const success = await advanceToStep(stepId);
     if (success) {
       onStepChange(stepId);
+      
+      // Add to history
+      const step = workflowSteps.find(s => s.id === stepId);
+      if (step) {
+        setStepHistory(prev => [...prev, {
+          stepId,
+          stepTitle: step.title,
+          status: 'completed',
+          timestamp: new Date(),
+          duration: 30000 // Mock duration
+        }]);
+      }
     }
     return success;
   };
@@ -42,7 +103,6 @@ export const TroubleshootingWorkflow = ({
   const handleStepSkip = (stepId: string) => {
     const success = skipStep(stepId);
     if (success) {
-      // Find the next available step
       const currentIndex = workflowSteps.findIndex(s => s.id === stepId);
       const nextStep = workflowSteps.find((step, index) => 
         index > currentIndex && step.status === 'pending'
@@ -52,6 +112,29 @@ export const TroubleshootingWorkflow = ({
       }
     }
     return success;
+  };
+
+  const handleQuickAction = (action: string) => {
+    console.log('Quick action:', action);
+    setNotifications(prev => [...prev, {
+      id: Date.now().toString(),
+      type: 'info',
+      title: 'Action executed',
+      message: `Quick action "${action}" has been executed`,
+      timestamp: new Date(),
+      actionable: false,
+      autoHide: true
+    }]);
+  };
+
+  const handleNotificationDismiss = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handlePreferenceChange = (id: string, value: any) => {
+    setPreferences(prev => prev.map(p => 
+      p.id === id ? { ...p, value } : p
+    ));
   };
 
   return (
@@ -74,35 +157,126 @@ export const TroubleshootingWorkflow = ({
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {/* Progress Tracker */}
-          <WorkflowProgressTracker 
-            analytics={analytics}
-            currentStep={currentStep}
+          {/* Enhanced Navigation */}
+          <WorkflowBreadcrumbNav
+            steps={workflowSteps}
+            currentStepId={currentStep}
+            onStepClick={onStepChange}
+            onPrevious={() => {
+              const currentIndex = workflowSteps.findIndex(s => s.id === currentStep);
+              if (currentIndex > 0) {
+                onStepChange(workflowSteps[currentIndex - 1].id);
+              }
+            }}
+            onNext={() => {
+              const currentIndex = workflowSteps.findIndex(s => s.id === currentStep);
+              if (currentIndex < workflowSteps.length - 1) {
+                onStepChange(workflowSteps[currentIndex + 1].id);
+              }
+            }}
           />
           
           <Separator />
           
-          {/* Workflow Steps */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-slate-800">Workflow Steps</h3>
-            {workflowSteps.map((step, index) => (
-              <div key={step.id}>
-                <WorkflowStepValidator
-                  step={step}
-                  validationErrors={validationErrors[step.id]}
-                  onValidate={validateStep}
-                  onAdvance={handleStepAdvance}
-                  onSkip={step.optional ? handleStepSkip : undefined}
-                />
-                
-                {index < workflowSteps.length - 1 && (
-                  <div className="flex justify-center py-2">
-                    <div className="w-px h-4 bg-gray-300"></div>
+          {/* Tabbed Interface for Better Organization */}
+          <Tabs defaultValue="workflow" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="workflow">Workflow</TabsTrigger>
+              <TabsTrigger value="insights">Insights</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="notifications">Updates</TabsTrigger>
+              <TabsTrigger value="preferences">Settings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="workflow" className="space-y-4">
+              {/* Progress Tracker */}
+              <WorkflowProgressTracker 
+                analytics={analytics}
+                currentStep={currentStep}
+              />
+              
+              {/* Quick Actions */}
+              <WorkflowQuickActions
+                currentStepId={currentStep}
+                canSkipCurrentStep={workflowSteps.find(s => s.id === currentStep)?.optional || false}
+                canMarkComplete={true}
+                onSkipStep={() => handleStepSkip(currentStep)}
+                onMarkComplete={() => handleStepAdvance(currentStep)}
+                onRestart={() => onStepChange('analyze')}
+                onGetHelp={() => handleQuickAction('get-help')}
+                onShareWorkflow={() => handleQuickAction('share')}
+                onExportProgress={() => handleQuickAction('export')}
+                onViewDocumentation={() => handleQuickAction('docs')}
+              />
+              
+              {/* Workflow Steps */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-slate-800">Workflow Steps</h3>
+                {workflowSteps.map((step, index) => (
+                  <div key={step.id} className="space-y-2">
+                    <WorkflowStepValidator
+                      step={step}
+                      validationErrors={validationErrors[step.id]}
+                      onValidate={validateStep}
+                      onAdvance={handleStepAdvance}
+                      onSkip={step.optional ? handleStepSkip : undefined}
+                    />
+                    
+                    {step.status === 'active' && (
+                      <WorkflowStepTimer
+                        stepId={step.id}
+                        stepTitle={step.title}
+                        isActive={true}
+                        onTimeUpdate={(stepId, time) => console.log('Time update:', stepId, time)}
+                      />
+                    )}
+                    
+                    {index < workflowSteps.length - 1 && (
+                      <div className="flex justify-center py-2">
+                        <div className="w-px h-4 bg-gray-300"></div>
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </TabsContent>
+            
+            <TabsContent value="insights">
+              <WorkflowInsights
+                insights={insights}
+                currentStepId={currentStep}
+                progressPercent={analytics.progressPercent}
+                averageStepTime={analytics.averageStepTime}
+                onApplyInsight={(id) => console.log('Apply insight:', id)}
+              />
+            </TabsContent>
+            
+            <TabsContent value="history">
+              <WorkflowStepHistory
+                history={stepHistory}
+                onRevisitStep={onStepChange}
+                onClearHistory={() => setStepHistory([])}
+              />
+            </TabsContent>
+            
+            <TabsContent value="notifications">
+              <WorkflowNotifications
+                notifications={notifications}
+                onDismiss={handleNotificationDismiss}
+                onDismissAll={() => setNotifications([])}
+              />
+            </TabsContent>
+            
+            <TabsContent value="preferences">
+              <WorkflowPreferences
+                preferences={preferences}
+                onPreferenceChange={handlePreferenceChange}
+                onSavePreferences={() => console.log('Save preferences')}
+                onResetToDefaults={() => console.log('Reset preferences')}
+                hasUnsavedChanges={false}
+              />
+            </TabsContent>
+          </Tabs>
           
           <Separator />
           
