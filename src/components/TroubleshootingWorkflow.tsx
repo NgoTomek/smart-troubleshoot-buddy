@@ -70,6 +70,11 @@ export const TroubleshootingWorkflow = ({
     stepDurations,
   });
 
+  // Wrapper function to handle the parameter mismatch
+  const handleSaveTemplate = (name: string) => {
+    handleSaveAsTemplate(name, ''); // Provide empty description as default
+  };
+
   return (
     <div className="space-y-6">
       {/* Main Workflow Card */}
@@ -130,7 +135,7 @@ export const TroubleshootingWorkflow = ({
             handleNotificationDismiss={handleNotificationDismiss}
             handleNotificationsDismissAll={handleNotificationsDismissAll}
             onLoadTemplate={handleLoadTemplate}
-            onSaveAsTemplate={handleSaveAsTemplate}
+            onSaveAsTemplate={handleSaveTemplate}
             onImportWorkflow={handleImportWorkflow}
             onImportProgress={handleImportProgress}
             isCollaborationEnabled={isCollaborationEnabled}
