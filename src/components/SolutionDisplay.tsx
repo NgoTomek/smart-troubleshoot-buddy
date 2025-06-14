@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
@@ -16,11 +15,10 @@ import { SolutionEffectivenessTracker } from '@/components/SolutionEffectiveness
 import { CollaborationPanel } from '@/components/CollaborationPanel';
 import { AIInsightsEngine } from '@/components/AIInsightsEngine';
 import { PerformanceMonitor } from '@/components/PerformanceMonitor';
-import { TroubleshootingWorkflow } from '@/components/TroubleshootingWorkflow';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
 import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { useSolutionState } from '@/hooks/useSolutionState';
-import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowManager } from './WorkflowManager';
 
 interface Solution {
   id: number;
@@ -57,16 +55,6 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState(solutions, problemContext);
 
-  const {
-    workflowSteps,
-    currentStep,
-    validationErrors,
-    advanceToStep,
-    skipStep,
-    validateStep,
-    getAnalytics,
-  } = useAdvancedWorkflowState('solutions');
-
   const [isCollaborationActive, setIsCollaborationActive] = React.useState(false);
 
   const handleRecommendationUpdate = (recommendations: any[]) => {
@@ -90,10 +78,6 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     console.log('Inviting team members to collaboration session');
   };
 
-  const handleWorkflowStepChange = (stepId: string) => {
-    advanceToStep(stepId);
-  };
-
   return (
     <div className="space-y-6">
       {/* Collaboration Notifications - Fixed Position */}
@@ -108,16 +92,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
 
       {/* Workflow and Quality Assessment */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TroubleshootingWorkflow
-          workflowSteps={workflowSteps}
-          currentStep={currentStep}
-          onStepChange={handleWorkflowStepChange}
-          validationErrors={validationErrors}
-          advanceToStep={advanceToStep}
-          skipStep={skipStep}
-          validateStep={validateStep}
-          getAnalytics={getAnalytics}
-        />
+        <WorkflowManager />
         
         <SolutionQualityAssessment
           solutions={solutions}
