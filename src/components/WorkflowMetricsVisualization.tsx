@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +11,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   LineChart,
   Line,
   Area,
@@ -25,16 +21,9 @@ import {
   Clock, 
   Target, 
   Users,
-  Calendar,
   Filter
 } from 'lucide-react';
-
-interface WorkflowMetrics {
-  stepCompletionTimes: { step: string; time: number; }[];
-  successRates: { step: string; success: number; failure: number; }[];
-  collaborationData: { day: string; collaborators: number; }[];
-  performanceTrends: { date: string; efficiency: number; }[];
-}
+import { WorkflowMetrics } from '@/lib/analytics';
 
 interface WorkflowMetricsVisualizationProps {
   metrics: WorkflowMetrics;
@@ -47,46 +36,26 @@ export const WorkflowMetricsVisualization = ({
   timeRange, 
   onTimeRangeChange 
 }: WorkflowMetricsVisualizationProps) => {
-  const [selectedMetric, setSelectedMetric] = useState('completion');
 
-  // Sample data - in real app this would come from props
-  const completionTimeData = [
-    { step: 'Analyze', avgTime: 45, sessions: 23 },
-    { step: 'Solutions', avgTime: 120, sessions: 19 },
-    { step: 'Execute', avgTime: 300, sessions: 15 },
-    { step: 'Collaborate', avgTime: 180, sessions: 8 },
-    { step: 'Feedback', avgTime: 60, sessions: 12 }
-  ];
+  const completionTimeData = (metrics.stepCompletionTimes || []).map(d => ({
+    step: d.name,
+    avgTime: d.time,
+  }));
 
-  const successRateData = [
-    { step: 'Analyze', success: 95, failure: 5 },
-    { step: 'Solutions', success: 88, failure: 12 },
-    { step: 'Execute', success: 76, failure: 24 },
-    { step: 'Collaborate', success: 82, failure: 18 },
-    { step: 'Feedback', success: 92, failure: 8 }
-  ];
+  const successRateData = (metrics.successRates || []).map(d => ({
+    step: d.name,
+    success: d.completed,
+    failure: d.failed,
+    skipped: d.skipped,
+  }));
 
-  const performanceData = [
-    { date: '2024-06-08', efficiency: 85, sessions: 12 },
-    { date: '2024-06-09', efficiency: 78, sessions: 15 },
-    { date: '2024-06-10', efficiency: 92, sessions: 18 },
-    { date: '2024-06-11', efficiency: 88, sessions: 14 },
-    { date: '2024-06-12', efficiency: 96, sessions: 20 },
-    { date: '2024-06-13', efficiency: 91, sessions: 16 },
-    { date: '2024-06-14', efficiency: 89, sessions: 19 }
-  ];
+  const performanceData = (metrics.performanceTrends || []).map(d => ({
+    date: d.date,
+    completions: d.completions,
+    avgTime: d.avgTime
+  }));
 
-  const collaborationData = [
-    { day: 'Mon', collaborators: 4, sessions: 8 },
-    { day: 'Tue', collaborators: 6, sessions: 12 },
-    { day: 'Wed', collaborators: 8, sessions: 15 },
-    { day: 'Thu', collaborators: 5, sessions: 10 },
-    { day: 'Fri', collaborators: 7, sessions: 14 },
-    { day: 'Sat', collaborators: 3, sessions: 5 },
-    { day: 'Sun', collaborators: 2, sessions: 3 }
-  ];
-
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+  const collaborationData = metrics.collaborationData || [];
 
   const formatTime = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
@@ -163,7 +132,7 @@ export const WorkflowMetricsVisualization = ({
                   <XAxis dataKey="step" />
                   <YAxis tickFormatter={formatTime} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="avgTime" fill="#3B82F6" />
+                  <Bar dataKey="avgTime" fill="#3B82F6" name="Avg Time" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -171,19 +140,19 @@ export const WorkflowMetricsVisualization = ({
             <div className="grid grid-cols-3 gap-4 mt-4">
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-indigo-600">
-                  {formatTime(completionTimeData.reduce((acc, item) => acc + item.avgTime, 0) / completionTimeData.length)}
+                  {completionTimeData.length > 0 ? formatTime(completionTimeData.reduce((acc, item) => acc + item.avgTime, 0) / completionTimeData.length) : 'N/A'}
                 </div>
-                <div className="text-xs text-slate-600">Avg Total Time</div>
+                <div className="text-xs text-slate-600">Avg Step Time</div>
               </div>
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-green-600">
-                  {formatTime(Math.min(...completionTimeData.map(item => item.avgTime)))}
+                  {completionTimeData.length > 0 ? formatTime(Math.min(...completionTimeData.map(item => item.avgTime))) : 'N/A'}
                 </div>
                 <div className="text-xs text-slate-600">Fastest Step</div>
               </div>
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-red-600">
-                  {formatTime(Math.max(...completionTimeData.map(item => item.avgTime)))}
+                  {completionTimeData.length > 0 ? formatTime(Math.max(...completionTimeData.map(item => item.avgTime))) : 'N/A'}
                 </div>
                 <div className="text-xs text-slate-600">Slowest Step</div>
               </div>
@@ -201,10 +170,11 @@ export const WorkflowMetricsVisualization = ({
                 <BarChart data={successRateData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="step" />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis />
                   <Tooltip />
-                  <Bar dataKey="success" stackId="a" fill="#10B981" />
-                  <Bar dataKey="failure" stackId="a" fill="#EF4444" />
+                  <Bar dataKey="success" stackId="a" fill="#10B981" name="Completed" />
+                  <Bar dataKey="skipped" stackId="a" fill="#F59E0B" name="Skipped" />
+                  <Bar dataKey="failure" stackId="a" fill="#EF4444" name="Failed" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -221,9 +191,9 @@ export const WorkflowMetricsVisualization = ({
                 <AreaChart data={performanceData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis />
                   <Tooltip />
-                  <Area type="monotone" dataKey="efficiency" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
+                  <Area type="monotone" dataKey="completions" name="Completions" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -231,21 +201,21 @@ export const WorkflowMetricsVisualization = ({
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-blue-600">
-                  {Math.round(performanceData.reduce((acc, item) => acc + item.efficiency, 0) / performanceData.length)}%
+                  {performanceData.length > 0 ? `${Math.round(performanceData.reduce((acc, item) => acc + item.completions, 0) / performanceData.length)}` : 'N/A'}
                 </div>
-                <div className="text-xs text-slate-600">Avg Efficiency</div>
+                <div className="text-xs text-slate-600">Avg Daily Completions</div>
               </div>
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-green-600">
-                  {Math.max(...performanceData.map(item => item.efficiency))}%
+                  {performanceData.length > 0 ? `${Math.max(...performanceData.map(item => item.completions))}` : 'N/A'}
                 </div>
-                <div className="text-xs text-slate-600">Peak Efficiency</div>
+                <div className="text-xs text-slate-600">Peak Completions</div>
               </div>
               <div className="text-center p-3 bg-white rounded-lg border">
                 <div className="text-lg font-bold text-orange-600">
-                  {performanceData.reduce((acc, item) => acc + item.sessions, 0)}
+                  {performanceData.reduce((acc, item) => acc + item.completions, 0)}
                 </div>
-                <div className="text-xs text-slate-600">Total Sessions</div>
+                <div className="text-xs text-slate-600">Total Completions</div>
               </div>
             </div>
           </TabsContent>
@@ -257,32 +227,40 @@ export const WorkflowMetricsVisualization = ({
             </div>
             
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={collaborationData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="collaborators" stroke="#8B5CF6" strokeWidth={2} />
-                  <Line type="monotone" dataKey="sessions" stroke="#10B981" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
+              {collaborationData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={collaborationData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="collaborators" stroke="#8B5CF6" strokeWidth={2} />
+                    <Line type="monotone" dataKey="sessions" stroke="#10B981" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-500">
+                  No collaboration data available for the selected time range.
+                </div>
+              )}
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-white rounded-lg border">
-                <div className="text-lg font-bold text-purple-600">
-                  {Math.round(collaborationData.reduce((acc, item) => acc + item.collaborators, 0) / collaborationData.length)}
+            {collaborationData.length > 0 && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-white rounded-lg border">
+                  <div className="text-lg font-bold text-purple-600">
+                    {Math.round(collaborationData.reduce((acc, item) => acc + item.collaborators, 0) / collaborationData.length)}
+                  </div>
+                  <div className="text-xs text-slate-600">Avg Daily Collaborators</div>
                 </div>
-                <div className="text-xs text-slate-600">Avg Daily Collaborators</div>
-              </div>
-              <div className="text-center p-3 bg-white rounded-lg border">
-                <div className="text-lg font-bold text-green-600">
-                  {collaborationData.reduce((acc, item) => acc + item.sessions, 0)}
+                <div className="text-center p-3 bg-white rounded-lg border">
+                  <div className="text-lg font-bold text-green-600">
+                    {collaborationData.reduce((acc, item) => acc + item.sessions, 0)}
+                  </div>
+                  <div className="text-xs text-slate-600">Total Sessions</div>
                 </div>
-                <div className="text-xs text-slate-600">Total Sessions</div>
               </div>
-            </div>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
