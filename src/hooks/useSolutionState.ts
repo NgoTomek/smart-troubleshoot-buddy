@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTroubleshootingHistory } from '@/hooks/useTroubleshootingHistory';
+import { Solution } from '@/types/solution';
 
-export const useSolutionState = (solutions?: any[], problemDescription?: string) => {
+export const useSolutionState = (solutions?: Solution[], problemDescription?: string) => {
   const { toast } = useToast();
   const { addSession } = useTroubleshootingHistory();
   const [quickFeedback, setQuickFeedback] = useState<{[key: number]: 'helpful' | 'not-helpful' | null}>({});

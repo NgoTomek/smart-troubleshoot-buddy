@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ImageUpload } from '@/components/ImageUpload';
 import { ContextForm } from '@/components/ContextForm';
@@ -13,12 +14,13 @@ import { StatsDisplay } from '@/components/StatsDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, HelpCircle, Home, Bookmark, Wrench } from 'lucide-react';
+import { Solution } from '@/types/solution';
 
 const Index = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [extractedText, setExtractedText] = useState<string>('');
   const [contextData, setContextData] = useState<any>(null);
-  const [solutions, setSolutions] = useState<any[]>([]);
+  const [solutions, setSolutions] = useState<Solution[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentView, setCurrentView] = useState<'main' | 'faq' | 'stats' | 'saved' | 'tools'>('main');
 
