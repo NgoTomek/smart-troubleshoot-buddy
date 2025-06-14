@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MessageSquare, Zap, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContextFormProps {
   extractedText: string;
@@ -15,6 +16,7 @@ interface ContextFormProps {
 }
 
 export const ContextForm = ({ extractedText, onSubmit, isAnalyzing }: ContextFormProps) => {
+  const { toast } = useToast();
   const [context, setContext] = useState('');
   const [category, setCategory] = useState('');
   const [urgency, setUrgency] = useState('medium');
@@ -22,6 +24,13 @@ export const ContextForm = ({ extractedText, onSubmit, isAnalyzing }: ContextFor
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    toast({
+      title: "Analysis Started",
+      description: "Our AI is analyzing your issue and generating solutions...",
+      duration: 3000,
+    });
+    
     onSubmit({
       extractedText,
       additionalContext: context,

@@ -4,6 +4,8 @@ import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
 import { SolutionList } from '@/components/SolutionList';
 import { ProgressSummary } from '@/components/ProgressSummary';
+import { SolutionInsights } from '@/components/SolutionInsights';
+import { QuickActions } from '@/components/QuickActions';
 import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
@@ -44,6 +46,14 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         extractedText={extractedText} 
         contextData={contextData} 
       />
+
+      <SolutionInsights 
+        solutions={solutions}
+        completedSteps={completedSteps}
+        quickFeedback={quickFeedback}
+      />
+
+      <QuickActions />
 
       <SolutionList
         solutions={solutions}
