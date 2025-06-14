@@ -7,6 +7,11 @@ import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
+import { FAQSection } from '@/components/FAQSection';
+import { StatsDisplay } from '@/components/StatsDisplay';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart3, HelpCircle, Home } from 'lucide-react';
 
 const Index = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -14,6 +19,7 @@ const Index = () => {
   const [contextData, setContextData] = useState<any>(null);
   const [solutions, setSolutions] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentView, setCurrentView] = useState<'main' | 'faq' | 'stats'>('main');
 
   const handleImagesUploaded = (images: File[]) => {
     console.log('Images uploaded:', images);
@@ -88,7 +94,62 @@ const Index = () => {
     }, 2000);
   };
 
+  const resetToHome = () => {
+    setUploadedImages([]);
+    setExtractedText('');
+    setContextData(null);
+    setSolutions([]);
+    setIsAnalyzing(false);
+    setCurrentView('main');
+  };
+
   const hasResults = solutions.length > 0;
+
+  if (currentView === 'faq') {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <Header />
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="mb-6">
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentView('main')}
+                className="mb-4"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </div>
+            <FAQSection />
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
+  if (currentView === 'stats') {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <Header />
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="mb-6">
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentView('main')}
+                className="mb-4"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </div>
+            <StatsDisplay />
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
@@ -98,23 +159,41 @@ const Index = () => {
         {!hasResults ? (
           <>
             <HeroSection />
-            <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-              <ImageUpload 
-                onImagesUploaded={handleImagesUploaded}
-                extractedText={extractedText}
-              />
-              
-              {extractedText && (
-                <ContextForm 
-                  extractedText={extractedText}
-                  onSubmit={handleContextSubmitted}
-                  isAnalyzing={isAnalyzing}
-                />
-              )}
-              
-              {isAnalyzing && (
-                <AnalysisProgress isAnalyzing={isAnalyzing} />
-              )}
+            
+            {/* Navigation Tabs */}
+            <div className="max-w-4xl mx-auto px-4 mb-8">
+              <Tabs defaultValue="troubleshoot" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="troubleshoot">Troubleshoot Issue</TabsTrigger>
+                  <TabsTrigger value="faq" onClick={() => setCurrentView('faq')}>
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    FAQ
+                  </TabsTrigger>
+                  <TabsTrigger value="stats" onClick={() => setCurrentView('stats')}>
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Statistics
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="troubleshoot" className="space-y-8 mt-8">
+                  <ImageUpload 
+                    onImagesUploaded={handleImagesUploaded}
+                    extractedText={extractedText}
+                  />
+                  
+                  {extractedText && (
+                    <ContextForm 
+                      extractedText={extractedText}
+                      onSubmit={handleContextSubmitted}
+                      isAnalyzing={isAnalyzing}
+                    />
+                  )}
+                  
+                  {isAnalyzing && (
+                    <AnalysisProgress isAnalyzing={isAnalyzing} />
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </>
         ) : (
@@ -123,13 +202,7 @@ const Index = () => {
               solutions={solutions}
               extractedText={extractedText}
               contextData={contextData}
-              onStartOver={() => {
-                setUploadedImages([]);
-                setExtractedText('');
-                setContextData(null);
-                setSolutions([]);
-                setIsAnalyzing(false);
-              }}
+              onStartOver={resetToHome}
             />
           </div>
         )}
