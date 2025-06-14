@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Shield, Zap, Users } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
@@ -18,18 +18,29 @@ export const HeroSection = () => {
           No more endless forum searches or confusing tutorials.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <div className="flex items-center space-x-2 text-slate-500">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span>92% success rate</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="flex flex-col items-center space-y-2 text-slate-600">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <Shield className="w-6 h-6 text-green-600" />
+            </div>
+            <span className="font-semibold">92% Success Rate</span>
+            <span className="text-sm">Proven solutions</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-500">
-            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-            <span>1M+ problems solved</span>
+          
+          <div className="flex flex-col items-center space-y-2 text-slate-600">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Zap className="w-6 h-6 text-blue-600" />
+            </div>
+            <span className="font-semibold">3 Min Average</span>
+            <span className="text-sm">Time to fix</span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-500">
-            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-            <span>Average fix time: 3 min</span>
+          
+          <div className="flex flex-col items-center space-y-2 text-slate-600">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-purple-600" />
+            </div>
+            <span className="font-semibold">1M+ Problems</span>
+            <span className="text-sm">Successfully solved</span>
           </div>
         </div>
         
