@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Brain, History, Lightbulb, Bell, Settings } from 'lucide-react';
+import { Target, Brain, History, Lightbulb, Bell, Settings, Share2, BarChart3 } from 'lucide-react';
 import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
 import { WorkflowProgressTracker } from '@/components/WorkflowProgressTracker';
 import { WorkflowStepValidator } from '@/components/WorkflowStepValidator';
@@ -15,6 +15,10 @@ import { WorkflowStepHistory } from '@/components/WorkflowStepHistory';
 import { WorkflowInsights } from '@/components/WorkflowInsights';
 import { WorkflowNotifications } from '@/components/WorkflowNotifications';
 import { WorkflowPreferences } from '@/components/WorkflowPreferences';
+import { WorkflowTemplateManager } from '@/components/WorkflowTemplateManager';
+import { WorkflowStateSync } from '@/components/WorkflowStateSync';
+import { WorkflowExportImport } from '@/components/WorkflowExportImport';
+import { WorkflowMetricsVisualization } from '@/components/WorkflowMetricsVisualization';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -78,6 +82,10 @@ export const TroubleshootingWorkflow = ({
     }
   ]);
 
+  // New state for enhanced features
+  const [isCollaborationEnabled, setIsCollaborationEnabled] = useState(false);
+  const [metricsTimeRange, setMetricsTimeRange] = useState<'7d' | '30d' | '90d'>('7d');
+
   const analytics = getAnalytics();
 
   const handleStepAdvance = async (stepId: string) => {
@@ -116,6 +124,9 @@ export const TroubleshootingWorkflow = ({
 
   const handleQuickAction = (action: string) => {
     console.log('Quick action:', action);
+    if (action === 'enable-collaboration') {
+      setIsCollaborationEnabled(true);
+    }
     setNotifications(prev => [...prev, {
       id: Date.now().toString(),
       type: 'info',
@@ -135,6 +146,41 @@ export const TroubleshootingWorkflow = ({
     setPreferences(prev => prev.map(p => 
       p.id === id ? { ...p, value } : p
     ));
+  };
+
+  // New handlers for enhanced features
+  const handleLoadTemplate = (template: any) => {
+    console.log('Loading template:', template);
+    handleQuickAction('template-loaded');
+  };
+
+  const handleSaveAsTemplate = (name: string, description: string) => {
+    console.log('Saving template:', { name, description, workflow: workflowSteps });
+    handleQuickAction('template-saved');
+  };
+
+  const handleImportWorkflow = (workflow: any) => {
+    console.log('Importing workflow:', workflow);
+    handleQuickAction('workflow-imported');
+  };
+
+  const handleImportProgress = (progress: any) => {
+    console.log('Importing progress:', progress);
+  };
+
+  const handleSyncStateChange = (isConnected: boolean) => {
+    console.log('Sync state changed:', isConnected);
+  };
+
+  const handleConflictResolution = (conflicts: any[]) => {
+    console.log('Resolving conflicts:', conflicts);
+  };
+
+  const mockMetrics = {
+    stepCompletionTimes: [],
+    successRates: [],
+    collaborationData: [],
+    performanceTrends: []
   };
 
   return (
@@ -178,14 +224,16 @@ export const TroubleshootingWorkflow = ({
           
           <Separator />
           
-          {/* Tabbed Interface for Better Organization */}
+          {/* Enhanced Tabbed Interface */}
           <Tabs defaultValue="workflow" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="workflow">Workflow</TabsTrigger>
               <TabsTrigger value="insights">Insights</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="notifications">Updates</TabsTrigger>
-              <TabsTrigger value="preferences">Settings</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="collaboration">Sync</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             
             <TabsContent value="workflow" className="space-y-4">
@@ -266,14 +314,48 @@ export const TroubleshootingWorkflow = ({
                 onDismissAll={() => setNotifications([])}
               />
             </TabsContent>
-            
-            <TabsContent value="preferences">
-              <WorkflowPreferences
-                preferences={preferences}
-                onPreferenceChange={handlePreferenceChange}
-                onSavePreferences={() => console.log('Save preferences')}
-                onResetToDefaults={() => console.log('Reset preferences')}
-                hasUnsavedChanges={false}
+
+            <TabsContent value="templates">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <WorkflowTemplateManager
+                  currentWorkflow={workflowSteps}
+                  onLoadTemplate={handleLoadTemplate}
+                  onSaveAsTemplate={handleSaveAsTemplate}
+                />
+                
+                <WorkflowExportImport
+                  currentWorkflow={workflowSteps}
+                  currentProgress={analytics}
+                  onImportWorkflow={handleImportWorkflow}
+                  onImportProgress={handleImportProgress}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="collaboration">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <WorkflowStateSync
+                  isCollaborationEnabled={isCollaborationEnabled}
+                  currentStepId={currentStep}
+                  onSyncStateChange={handleSyncStateChange}
+                  onConflictResolution={handleConflictResolution}
+                />
+                
+                <WorkflowPreferences
+                  preferences={preferences}
+                  onPreferenceChange={handlePreferenceChange}
+                  onSavePreferences={() => console.log('Save preferences')}
+                  onResetToDefaults={() => console.log('Reset preferences')}
+                  hasUnsavedChanges={false}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <WorkflowMetricsVisualization
+                metrics={mockMetrics}
+                timeRange={metricsTimeRange}
+                onTimeRangeChange={setMetricsTimeRange}
               />
             </TabsContent>
           </Tabs>
@@ -285,7 +367,7 @@ export const TroubleshootingWorkflow = ({
             <p className="text-sm text-slate-600 mb-3">
               Need help with any step? Our AI assistant provides contextual guidance.
             </p>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => handleQuickAction('ai-assistance')}>
               <Brain className="w-4 h-4 mr-2" />
               Get AI Assistance
             </Button>
