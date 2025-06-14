@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
-import { SolutionCard } from '@/components/SolutionCard';
+import { SolutionList } from '@/components/SolutionList';
 import { ProgressSummary } from '@/components/ProgressSummary';
+import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
   id: number;
@@ -24,28 +25,16 @@ interface SolutionDisplayProps {
 }
 
 export const SolutionDisplay = ({ solutions, extractedText, contextData, onStartOver }: SolutionDisplayProps) => {
-  const [quickFeedback, setQuickFeedback] = useState<{[key: number]: 'helpful' | 'not-helpful' | null}>({});
-  const [completedSteps, setCompletedSteps] = useState<{[key: string]: boolean}>({});
-  const [showDetailedFeedback, setShowDetailedFeedback] = useState<{[key: number]: boolean}>({});
-  const [submittedFeedback, setSubmittedFeedback] = useState<{[key: number]: boolean}>({});
-
-  const handleQuickFeedback = (solutionId: number, type: 'helpful' | 'not-helpful') => {
-    setQuickFeedback(prev => ({ ...prev, [solutionId]: type }));
-  };
-
-  const toggleDetailedFeedback = (solutionId: number) => {
-    setShowDetailedFeedback(prev => ({ ...prev, [solutionId]: !prev[solutionId] }));
-  };
-
-  const handleFeedbackSubmitted = (solutionId: number, feedback: any) => {
-    console.log('Detailed feedback submitted for solution', solutionId, feedback);
-    setSubmittedFeedback(prev => ({ ...prev, [solutionId]: true }));
-    setShowDetailedFeedback(prev => ({ ...prev, [solutionId]: false }));
-  };
-
-  const toggleStep = (stepKey: string) => {
-    setCompletedSteps(prev => ({ ...prev, [stepKey]: !prev[stepKey] }));
-  };
+  const {
+    quickFeedback,
+    completedSteps,
+    showDetailedFeedback,
+    submittedFeedback,
+    handleQuickFeedback,
+    toggleDetailedFeedback,
+    handleFeedbackSubmitted,
+    toggleStep
+  } = useSolutionState();
 
   return (
     <div className="space-y-6">
@@ -56,23 +45,17 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         contextData={contextData} 
       />
 
-      <div className="space-y-6">
-        {solutions.map((solution, index) => (
-          <SolutionCard
-            key={solution.id}
-            solution={solution}
-            isRecommended={index === 0}
-            completedSteps={completedSteps}
-            quickFeedback={quickFeedback}
-            showDetailedFeedback={showDetailedFeedback}
-            submittedFeedback={submittedFeedback}
-            onToggleStep={toggleStep}
-            onQuickFeedback={handleQuickFeedback}
-            onToggleDetailedFeedback={toggleDetailedFeedback}
-            onFeedbackSubmitted={handleFeedbackSubmitted}
-          />
-        ))}
-      </div>
+      <SolutionList
+        solutions={solutions}
+        completedSteps={completedSteps}
+        quickFeedback={quickFeedback}
+        showDetailedFeedback={showDetailedFeedback}
+        submittedFeedback={submittedFeedback}
+        onToggleStep={toggleStep}
+        onQuickFeedback={handleQuickFeedback}
+        onToggleDetailedFeedback={toggleDetailedFeedback}
+        onFeedbackSubmitted={handleFeedbackSubmitted}
+      />
 
       <ProgressSummary
         completedSteps={completedSteps}
