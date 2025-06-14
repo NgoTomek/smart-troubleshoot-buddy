@@ -16,6 +16,9 @@ import { SolutionEffectivenessTracker } from '@/components/SolutionEffectiveness
 import { CollaborationPanel } from '@/components/CollaborationPanel';
 import { AIInsightsEngine } from '@/components/AIInsightsEngine';
 import { PerformanceMonitor } from '@/components/PerformanceMonitor';
+import { TroubleshootingWorkflow } from '@/components/TroubleshootingWorkflow';
+import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
+import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
@@ -53,6 +56,9 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState(solutions, problemContext);
 
+  const [currentWorkflowStep, setCurrentWorkflowStep] = React.useState('solutions');
+  const [isCollaborationActive, setIsCollaborationActive] = React.useState(false);
+
   const handleRecommendationUpdate = (recommendations: any[]) => {
     console.log('Updated recommendations:', recommendations);
   };
@@ -70,17 +76,41 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
   };
 
   const handleInviteTeam = () => {
+    setIsCollaborationActive(true);
     console.log('Inviting team members to collaboration session');
+  };
+
+  const handleWorkflowStepChange = (stepId: string) => {
+    setCurrentWorkflowStep(stepId);
+    console.log('Workflow step changed to:', stepId);
   };
 
   return (
     <div className="space-y-6">
+      {/* Collaboration Notifications - Fixed Position */}
+      <CollaborationNotifications isCollaborationActive={isCollaborationActive} />
+
       <SolutionHeader onStartOver={onStartOver} />
       
       <ProblemSummary 
         extractedText={extractedText} 
         contextData={contextData} 
       />
+
+      {/* Workflow and Quality Assessment */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TroubleshootingWorkflow
+          currentStep={currentWorkflowStep}
+          onStepChange={handleWorkflowStepChange}
+          problemContext={problemContext}
+        />
+        
+        <SolutionQualityAssessment
+          solutions={solutions}
+          userFeedback={quickFeedback}
+          completedSteps={completedSteps}
+        />
+      </div>
 
       {/* Enhanced Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
