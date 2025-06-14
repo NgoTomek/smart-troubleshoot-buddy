@@ -8,7 +8,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AnalysisProgress } from '@/components/AnalysisProgress';
 import { FAQSection } from '@/components/FAQSection';
-import { StatsDisplay } from '@/components/StatsDisplay';
+import { StatsDisplay } from '@/components/StatsDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, HelpCircle, Home } from 'lucide-react';

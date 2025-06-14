@@ -35,6 +35,10 @@ export const FeedbackSystem = ({ solutionId, solutionTitle, onFeedbackSubmitted 
     setRating(starRating);
   };
 
+  const handleOutcomeChange = (value: string) => {
+    setOutcome(value as 'solved' | 'partially-solved' | 'not-solved' | '');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -106,7 +110,7 @@ export const FeedbackSystem = ({ solutionId, solutionTitle, onFeedbackSubmitted 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
             <Label>Did this solution solve your problem?</Label>
-            <RadioGroup value={outcome} onValueChange={setOutcome}>
+            <RadioGroup value={outcome} onValueChange={handleOutcomeChange}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="solved" id="solved" />
                 <Label htmlFor="solved" className="flex items-center space-x-2">
