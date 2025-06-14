@@ -5,11 +5,14 @@ import { WorkflowPreferences } from '@/components/WorkflowPreferences';
 
 export interface Preference {
     id: string;
-    category: string;
+    category: 'notifications' | 'timing' | 'display' | 'automation';
     label: string;
     description: string;
-    type: 'boolean' | 'string' | 'number';
+    type: 'boolean' | 'select' | 'number';
     value: any;
+    options?: { value: string; label: string; }[];
+    min?: number;
+    max?: number;
 }
 
 interface CollaborationTabContentProps {

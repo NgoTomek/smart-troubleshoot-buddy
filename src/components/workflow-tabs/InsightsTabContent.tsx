@@ -5,7 +5,7 @@ import { WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
 
 export interface Insight {
   id: string;
-  type: 'tip' | 'warning' | 'info';
+  type: 'tip' | 'warning' | 'optimization' | 'achievement';
   title: string;
   description: string;
   actionable: boolean;

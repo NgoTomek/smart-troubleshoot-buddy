@@ -4,12 +4,17 @@ import { WorkflowNotifications } from '@/components/WorkflowNotifications';
 
 export interface Notification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: 'success' | 'warning' | 'info' | 'reminder';
   title: string;
   message: string;
   timestamp: Date;
   actionable: boolean;
-  autoHide: boolean;
+  autoHide?: boolean;
+  action?: {
+    label: string;
+    handler: () => void;
+  };
+  duration?: number;
 }
 
 interface NotificationsTabContentProps {
