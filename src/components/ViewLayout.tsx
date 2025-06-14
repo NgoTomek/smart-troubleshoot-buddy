@@ -7,9 +7,12 @@ import { SavedSolutions } from '@/components/SavedSolutions';
 import { ToolsDashboard } from '@/components/ToolsDashboard';
 import { FAQSection } from '@/components/FAQSection';
 import { StatsDisplay } from '@/components/StatsDashboard';
+import { HowItWorksPage } from '@/components/HowItWorksPage';
+import { ExamplesPage } from '@/components/ExamplesPage';
+import { PricingPage } from '@/components/PricingPage';
 
 interface ViewLayoutProps {
-  currentView: 'saved' | 'tools' | 'faq' | 'stats';
+  currentView: 'saved' | 'tools' | 'faq' | 'stats' | 'how-it-works' | 'examples' | 'pricing';
   onBackToHome: () => void;
 }
 
@@ -19,53 +22,11 @@ export const ViewLayout = ({ currentView, onBackToHome }: ViewLayoutProps) => {
       case 'saved':
         return <SavedSolutions onBackToHome={onBackToHome} />;
       case 'tools':
-        return (
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="mb-6">
-              <Button 
-                variant="outline" 
-                onClick={onBackToHome}
-                className="mb-4"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </div>
-            <ToolsDashboard />
-          </div>
-        );
+        return <ExamplesPage onBackToHome={onBackToHome} />;
       case 'faq':
-        return (
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="mb-6">
-              <Button 
-                variant="outline" 
-                onClick={onBackToHome}
-                className="mb-4"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </div>
-            <FAQSection />
-          </div>
-        );
+        return <HowItWorksPage onBackToHome={onBackToHome} />;
       case 'stats':
-        return (
-          <div className="max-w-6xl mx-auto px-4 py-8">
-            <div className="mb-6">
-              <Button 
-                variant="outline" 
-                onClick={onBackToHome}
-                className="mb-4"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </div>
-            <StatsDisplay />
-          </div>
-        );
+        return <PricingPage onBackToHome={onBackToHome} />;
       default:
         return null;
     }
