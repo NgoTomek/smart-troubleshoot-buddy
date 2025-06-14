@@ -2,7 +2,7 @@
 import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
-import { SolutionList } from '@/components/SolutionList';
+import { SolutionManager } from '@/components/SolutionManager';
 import { ProgressSummary } from '@/components/ProgressSummary';
 import { SolutionInsights } from '@/components/SolutionInsights';
 import { QuickActions } from '@/components/QuickActions';
@@ -72,7 +72,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
 
       <QuickActions />
 
-      <SolutionList
+      <SolutionManager
         solutions={solutions}
         completedSteps={completedSteps}
         quickFeedback={quickFeedback}
