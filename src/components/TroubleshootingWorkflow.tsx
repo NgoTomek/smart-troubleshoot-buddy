@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Brain, History, Lightbulb, Bell, Settings, Share2, BarChart3 } from 'lucide-react';
-import { useAdvancedWorkflowState, WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
+import { Target, Brain } from 'lucide-react';
+import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
+import { useWorkflowTabsState } from '@/hooks/useWorkflowTabsState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
 import {
   AnalyticsTabContent,
@@ -16,10 +17,6 @@ import {
   TemplatesTabContent,
   WorkflowTabContent
 } from './workflow-tabs';
-import { Insight } from './workflow-tabs/InsightsTabContent';
-import { HistoryEntry } from './workflow-tabs/HistoryTabContent';
-import { Notification } from './workflow-tabs/NotificationsTabContent';
-import { Preference } from './workflow-tabs/CollaborationTabContent';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -41,51 +38,28 @@ export const TroubleshootingWorkflow = ({
     getAnalytics
   } = useAdvancedWorkflowState(currentStep);
 
-  // New state for additional features
-  const [stepHistory, setStepHistory] = useState<HistoryEntry[]>([]);
-  const [insights, setInsights] = useState<Insight[]>([
-    {
-      id: '1',
-      type: 'tip',
-      title: 'Consider automation',
-      description: 'This step could be automated for faster completion',
-      actionable: true,
-      priority: 'medium'
-    }
-  ]);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'info',
-      title: 'Step completed',
-      message: 'Analysis step completed successfully',
-      timestamp: new Date(),
-      actionable: false,
-      autoHide: true
-    }
-  ]);
-  const [preferences, setPreferences] = useState<Preference[]>([
-    {
-      id: 'auto_advance',
-      category: 'automation',
-      label: 'Auto-advance steps',
-      description: 'Automatically move to next step when current step is completed',
-      type: 'boolean',
-      value: false
-    },
-    {
-      id: 'notification_sound',
-      category: 'notifications',
-      label: 'Sound notifications',
-      description: 'Play sound when notifications appear',
-      type: 'boolean',
-      value: true
-    }
-  ]);
-
-  // New state for enhanced features
-  const [isCollaborationEnabled, setIsCollaborationEnabled] = useState(false);
-  const [metricsTimeRange, setMetricsTimeRange] = useState<'7d' | '30d' | '90d'>('7d');
+  const {
+    stepHistory,
+    insights,
+    notifications,
+    preferences,
+    isCollaborationEnabled,
+    metricsTimeRange,
+    setMetricsTimeRange,
+    addHistoryEntry,
+    handleClearHistory,
+    handleNotificationDismiss,
+    handleNotificationsDismissAll,
+    handlePreferenceChange,
+    handleApplyInsight,
+    handleQuickAction,
+    handleLoadTemplate,
+    handleSaveAsTemplate,
+    handleImportWorkflow,
+    handleImportProgress,
+    handleSyncStateChange,
+    handleConflictResolution,
+  } = useWorkflowTabsState(workflowSteps);
 
   const analytics = getAnalytics();
 
@@ -94,16 +68,14 @@ export const TroubleshootingWorkflow = ({
     if (success) {
       onStepChange(stepId);
       
-      // Add to history
       const step = workflowSteps.find(s => s.id === stepId);
       if (step) {
-        setStepHistory(prev => [...prev, {
+        addHistoryEntry({
           stepId,
           stepTitle: step.title,
           status: 'completed',
-          timestamp: new Date(),
           duration: 30000 // Mock duration
-        }]);
+        });
       }
     }
     return success;
@@ -121,60 +93,6 @@ export const TroubleshootingWorkflow = ({
       }
     }
     return success;
-  };
-
-  const handleQuickAction = (action: string) => {
-    console.log('Quick action:', action);
-    if (action === 'enable-collaboration') {
-      setIsCollaborationEnabled(true);
-    }
-    setNotifications(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'info',
-      title: 'Action executed',
-      message: `Quick action "${action}" has been executed`,
-      timestamp: new Date(),
-      actionable: false,
-      autoHide: true
-    }]);
-  };
-
-  const handleNotificationDismiss = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  const handlePreferenceChange = (id: string, value: any) => {
-    setPreferences(prev => prev.map(p => 
-      p.id === id ? { ...p, value } : p
-    ));
-  };
-
-  // New handlers for enhanced features
-  const handleLoadTemplate = (template: any) => {
-    console.log('Loading template:', template);
-    handleQuickAction('template-loaded');
-  };
-
-  const handleSaveAsTemplate = (name: string, description: string) => {
-    console.log('Saving template:', { name, description, workflow: workflowSteps });
-    handleQuickAction('template-saved');
-  };
-
-  const handleImportWorkflow = (workflow: any) => {
-    console.log('Importing workflow:', workflow);
-    handleQuickAction('workflow-imported');
-  };
-
-  const handleImportProgress = (progress: any) => {
-    console.log('Importing progress:', progress);
-  };
-
-  const handleSyncStateChange = (isConnected: boolean) => {
-    console.log('Sync state changed:', isConnected);
-  };
-
-  const handleConflictResolution = (conflicts: any[]) => {
-    console.log('Resolving conflicts:', conflicts);
   };
 
   const mockMetrics = {
@@ -256,7 +174,7 @@ export const TroubleshootingWorkflow = ({
                 insights={insights}
                 currentStep={currentStep}
                 analytics={analytics}
-                onApplyInsight={(id) => console.log('Apply insight:', id)}
+                onApplyInsight={handleApplyInsight}
               />
             </TabsContent>
             
@@ -264,7 +182,7 @@ export const TroubleshootingWorkflow = ({
               <HistoryTabContent
                 history={stepHistory}
                 onRevisitStep={onStepChange}
-                onClearHistory={() => setStepHistory([])}
+                onClearHistory={handleClearHistory}
               />
             </TabsContent>
             
@@ -272,7 +190,7 @@ export const TroubleshootingWorkflow = ({
               <NotificationsTabContent
                 notifications={notifications}
                 onDismiss={handleNotificationDismiss}
-                onDismissAll={() => setNotifications([])}
+                onDismissAll={handleNotificationsDismissAll}
               />
             </TabsContent>
 
