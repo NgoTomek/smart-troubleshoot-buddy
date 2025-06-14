@@ -3,21 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Target, Brain } from 'lucide-react';
 import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
 import { useWorkflowTabsState } from '@/hooks/useWorkflowTabsState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
-import {
-  AnalyticsTabContent,
-  CollaborationTabContent,
-  HistoryTabContent,
-  InsightsTabContent,
-  NotificationsTabContent,
-  TemplatesTabContent,
-  WorkflowTabContent
-} from './workflow-tabs';
 import { generateWorkflowMetrics } from '@/lib/analytics';
+import { WorkflowTabs } from './WorkflowTabs';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -97,13 +88,6 @@ export const TroubleshootingWorkflow = ({
     return success;
   };
 
-  const mockMetrics = {
-    stepCompletionTimes: [],
-    successRates: [],
-    collaborationData: [],
-    performanceTrends: []
-  };
-
   return (
     <div className="space-y-6">
       {/* Main Workflow Card */}
@@ -146,86 +130,36 @@ export const TroubleshootingWorkflow = ({
           <Separator />
           
           {/* Enhanced Tabbed Interface */}
-          <Tabs defaultValue="workflow" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
-              <TabsTrigger value="workflow">Workflow</TabsTrigger>
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="notifications">Updates</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-              <TabsTrigger value="collaboration">Sync</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="workflow">
-              <WorkflowTabContent
-                analytics={analytics}
-                currentStep={currentStep}
-                workflowSteps={workflowSteps}
-                validationErrors={validationErrors}
-                handleStepSkip={handleStepSkip}
-                handleStepAdvance={handleStepAdvance}
-                onStepChange={onStepChange}
-                handleQuickAction={handleQuickAction}
-                validateStep={validateStep}
-              />
-            </TabsContent>
-            
-            <TabsContent value="insights">
-              <InsightsTabContent
-                insights={insights}
-                currentStep={currentStep}
-                analytics={analytics}
-                onApplyInsight={handleApplyInsight}
-              />
-            </TabsContent>
-            
-            <TabsContent value="history">
-              <HistoryTabContent
-                history={stepHistory}
-                onRevisitStep={onStepChange}
-                onClearHistory={handleClearHistory}
-              />
-            </TabsContent>
-            
-            <TabsContent value="notifications">
-              <NotificationsTabContent
-                notifications={notifications}
-                onDismiss={handleNotificationDismiss}
-                onDismissAll={handleNotificationsDismissAll}
-              />
-            </TabsContent>
-
-            <TabsContent value="templates">
-              <TemplatesTabContent
-                workflowSteps={workflowSteps}
-                analytics={analytics}
-                onLoadTemplate={handleLoadTemplate}
-                onSaveAsTemplate={handleSaveAsTemplate}
-                onImportWorkflow={handleImportWorkflow}
-                onImportProgress={handleImportProgress}
-              />
-            </TabsContent>
-
-            <TabsContent value="collaboration">
-              <CollaborationTabContent
-                isCollaborationEnabled={isCollaborationEnabled}
-                currentStep={currentStep}
-                onSyncStateChange={handleSyncStateChange}
-                onConflictResolution={handleConflictResolution}
-                preferences={preferences}
-                onPreferenceChange={handlePreferenceChange}
-              />
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <AnalyticsTabContent
-                metrics={metrics}
-                timeRange={metricsTimeRange}
-                onTimeRangeChange={setMetricsTimeRange}
-              />
-            </TabsContent>
-          </Tabs>
+          <WorkflowTabs
+            analytics={analytics}
+            currentStep={currentStep}
+            workflowSteps={workflowSteps}
+            validationErrors={validationErrors}
+            handleStepSkip={handleStepSkip}
+            handleStepAdvance={handleStepAdvance}
+            onStepChange={onStepChange}
+            handleQuickAction={handleQuickAction}
+            validateStep={validateStep}
+            insights={insights}
+            onApplyInsight={handleApplyInsight}
+            stepHistory={stepHistory}
+            handleClearHistory={handleClearHistory}
+            notifications={notifications}
+            handleNotificationDismiss={handleNotificationDismiss}
+            handleNotificationsDismissAll={handleNotificationsDismissAll}
+            onLoadTemplate={handleLoadTemplate}
+            onSaveAsTemplate={handleSaveAsTemplate}
+            onImportWorkflow={handleImportWorkflow}
+            onImportProgress={handleImportProgress}
+            isCollaborationEnabled={isCollaborationEnabled}
+            onSyncStateChange={handleSyncStateChange}
+            onConflictResolution={handleConflictResolution}
+            preferences={preferences}
+            onPreferenceChange={handlePreferenceChange}
+            metrics={metrics}
+            metricsTimeRange={metricsTimeRange}
+            setMetricsTimeRange={setMetricsTimeRange}
+          />
           
           <Separator />
           
