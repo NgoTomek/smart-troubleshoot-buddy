@@ -8,6 +8,7 @@ export const WorkflowManager = () => {
     workflowSteps,
     currentStep,
     validationErrors,
+    stepDurations,
     advanceToStep,
     skipStep,
     validateStep,
@@ -28,6 +29,7 @@ export const WorkflowManager = () => {
       skipStep={skipStep}
       validateStep={validateStep}
       getAnalytics={getAnalytics}
+      stepDurations={stepDurations}
     />
   );
 };

@@ -8,32 +8,50 @@ export const useWorkflowActions = ({
   skipStep,
   addHistoryEntry,
   workflowSteps,
+  stepDurations,
 }: {
-  advanceToStep: (stepId: string) => Promise<boolean>;
+  advanceToStep: (stepId: string, skipValidation?: boolean) => Promise<boolean>;
   skipStep: (stepId: string) => boolean;
   addHistoryEntry: (entry: Omit<HistoryEntry, 'timestamp'>) => void;
   workflowSteps: WorkflowStep[];
+  stepDurations: { [key: string]: number };
 }) => {
   const handleStepAdvance = useCallback(async (stepId: string) => {
-    const success = await advanceToStep(stepId);
+    const currentIndex = workflowSteps.findIndex(s => s.id === stepId);
+    const nextStep = workflowSteps.find((step, index) => 
+      index > currentIndex && step.status === 'pending'
+    );
+    
+    const targetStepId = nextStep ? nextStep.id : stepId;
+    
+    const success = await advanceToStep(targetStepId, !nextStep);
     if (success) {
-      
       const step = workflowSteps.find(s => s.id === stepId);
       if (step) {
         addHistoryEntry({
           stepId,
           stepTitle: step.title,
           status: 'completed',
-          duration: 30000 // Mock duration
+          duration: stepDurations[stepId] || 0
         });
       }
     }
     return success;
-  }, [advanceToStep, addHistoryEntry, workflowSteps]);
+  }, [advanceToStep, addHistoryEntry, workflowSteps, stepDurations]);
 
   const handleStepSkip = useCallback((stepId: string) => {
     const success = skipStep(stepId);
     if (success) {
+      const step = workflowSteps.find(s => s.id === stepId);
+      if (step) {
+          addHistoryEntry({
+              stepId,
+              stepTitle: step.title,
+              status: 'skipped',
+              duration: 0
+          });
+      }
+
       const currentIndex = workflowSteps.findIndex(s => s.id === stepId);
       const nextStep = workflowSteps.find((step, index) => 
         index > currentIndex && step.status === 'pending'
@@ -43,7 +61,7 @@ export const useWorkflowActions = ({
       }
     }
     return success;
-  }, [skipStep, workflowSteps, advanceToStep]);
+  }, [skipStep, workflowSteps, advanceToStep, addHistoryEntry]);
 
   return { handleStepAdvance, handleStepSkip };
 };

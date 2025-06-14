@@ -16,10 +16,11 @@ interface TroubleshootingWorkflowProps {
   currentStep: string;
   onStepChange: (stepId: string) => void;
   validationErrors: { [key: string]: string[] };
-  advanceToStep: (stepId: string) => Promise<boolean>;
+  advanceToStep: (stepId: string, skipValidation?: boolean) => Promise<boolean>;
   skipStep: (stepId: string) => boolean;
   validateStep: (stepId: string) => Promise<boolean>;
   getAnalytics: () => WorkflowAnalytics;
+  stepDurations: { [key: string]: number };
 }
 
 export const TroubleshootingWorkflow = ({ 
@@ -30,7 +31,8 @@ export const TroubleshootingWorkflow = ({
   advanceToStep,
   skipStep,
   validateStep,
-  getAnalytics
+  getAnalytics,
+  stepDurations,
 }: TroubleshootingWorkflowProps) => {
 
   const {
@@ -64,6 +66,7 @@ export const TroubleshootingWorkflow = ({
     skipStep,
     addHistoryEntry,
     workflowSteps,
+    stepDurations,
   });
 
   return (

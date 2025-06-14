@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateWorkflowAnalytics } from '@/lib/analytics';
@@ -36,7 +35,7 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
     if (!step) return false;
 
     // Check requirements
-    if (!canAdvanceToStep(stepId)) {
+    if (currentStep !== stepId && !canAdvanceToStep(stepId)) {
       toast({
         title: "Cannot Advance",
         description: "Please complete the required previous steps first.",
@@ -65,23 +64,31 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
 
     // Update step statuses
     setWorkflowSteps(prev => prev.map(s => {
-      if (s.id === currentStep && s.id !== stepId) {
+      if (s.id === currentStep) {
         return { ...s, status: 'completed' as const };
       }
-      if (s.id === stepId) {
+      if (s.id === stepId && currentStep !== stepId) {
         return { ...s, status: 'active' as const };
       }
       return s;
     }));
 
-    setCurrentStep(stepId);
-    startStepTimer(stepId);
+    if (currentStep !== stepId) {
+      setCurrentStep(stepId);
+      startStepTimer(stepId);
 
-    toast({
-      title: "Step Activated",
-      description: `Now working on: ${step.title}`,
-      duration: 3000,
-    });
+      toast({
+        title: "Step Activated",
+        description: `Now working on: ${step.title}`,
+        duration: 3000,
+      });
+    } else {
+       toast({
+        title: "Workflow Complete!",
+        description: "You have completed all the steps.",
+        duration: 4000
+      });
+    }
 
     return true;
   }, [currentStep, workflowSteps, canAdvanceToStep, validateStep, toast, endStepTimer, startStepTimer]);
