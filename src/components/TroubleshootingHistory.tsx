@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,41 +12,14 @@ import {
   XCircle,
   MoreHorizontal,
   Trash2,
-  Eye
+  Eye,
+  Target,
+  Timer
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-interface TroubleshootingSession {
-  id: string;
-  timestamp: string;
-  problemDescription: string;
-  solutionsFound: number;
-  stepsCompleted: number;
-  totalSteps: number;
-  status: 'completed' | 'in-progress' | 'abandoned';
-  category: string;
-}
+import { useTroubleshootingHistory } from '@/hooks/useTroubleshootingHistory';
 
 export const TroubleshootingHistory = () => {
-  const { toast } = useToast();
-  const [sessions, setSessions] = useState<TroubleshootingSession[]>([]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('troubleshoot-history');
-    if (saved) {
-      setSessions(JSON.parse(saved));
-    }
-  }, []);
-
-  const clearHistory = () => {
-    localStorage.removeItem('troubleshoot-history');
-    setSessions([]);
-    toast({
-      title: "History Cleared",
-      description: "All troubleshooting history has been removed.",
-      duration: 3000,
-    });
-  };
+  const { sessions, deleteSession, clearHistory } = useTroubleshootingHistory();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,6 +27,15 @@ export const TroubleshootingHistory = () => {
       case 'in-progress': return 'bg-blue-100 text-blue-800';
       case 'abandoned': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="w-3 h-3 mr-1" />;
+      case 'in-progress': return <Clock className="w-3 h-3 mr-1" />;
+      case 'abandoned': return <XCircle className="w-3 h-3 mr-1" />;
+      default: return null;
     }
   };
 
@@ -65,6 +47,10 @@ export const TroubleshootingHistory = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getCompletionRate = (completed: number, total: number) => {
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
   };
 
   return (
@@ -111,12 +97,14 @@ export const TroubleshootingHistory = () => {
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center space-x-2">
                         <Badge variant="outline" className={getStatusColor(session.status)}>
-                          {session.status === 'completed' && <CheckCircle className="w-3 h-3 mr-1" />}
-                          {session.status === 'in-progress' && <Clock className="w-3 h-3 mr-1" />}
-                          {session.status === 'abandoned' && <XCircle className="w-3 h-3 mr-1" />}
+                          {getStatusIcon(session.status)}
                           {session.status.replace('-', ' ')}
                         </Badge>
                         <Badge variant="outline">{session.category}</Badge>
+                        <div className="flex items-center space-x-1 text-xs text-slate-600">
+                          <Target className="w-3 h-3" />
+                          <span>{Math.round(session.confidence * 100)}% confidence</span>
+                        </div>
                       </div>
                       
                       <p className="text-sm font-medium text-slate-900">
@@ -132,14 +120,44 @@ export const TroubleshootingHistory = () => {
                           <span>{session.solutionsFound} solutions found</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <span>{session.stepsCompleted}/{session.totalSteps} steps completed</span>
+                          <span>{session.stepsCompleted}/{session.totalSteps} steps ({getCompletionRate(session.stepsCompleted, session.totalSteps)}%)</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Timer className="w-3 h-3" />
+                          <span>{session.timeSpent}</span>
                         </div>
                       </div>
+                      
+                      {session.status === 'completed' && (
+                        <div className="mt-2">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            ✅ Successfully resolved
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      {session.status === 'in-progress' && (
+                        <div className="mt-2">
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            🔄 Still working on this
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => deleteSession(session.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 

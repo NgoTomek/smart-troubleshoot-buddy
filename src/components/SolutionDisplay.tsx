@@ -27,6 +27,11 @@ interface SolutionDisplayProps {
 }
 
 export const SolutionDisplay = ({ solutions, extractedText, contextData, onStartOver }: SolutionDisplayProps) => {
+  // Create problem context from extracted text and additional context
+  const problemContext = contextData?.additionalContext 
+    ? `${extractedText} - ${contextData.additionalContext}`
+    : extractedText;
+
   const {
     quickFeedback,
     completedSteps,
@@ -36,12 +41,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleDetailedFeedback,
     handleFeedbackSubmitted,
     toggleStep
-  } = useSolutionState();
-
-  // Create problem context from extracted text and additional context
-  const problemContext = contextData?.additionalContext 
-    ? `${extractedText} - ${contextData.additionalContext}`
-    : extractedText;
+  } = useSolutionState(solutions, problemContext);
 
   return (
     <div className="space-y-6">
