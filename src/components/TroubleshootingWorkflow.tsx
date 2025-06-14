@@ -5,20 +5,21 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Target, Brain, History, Lightbulb, Bell, Settings, Share2, BarChart3 } from 'lucide-react';
-import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
-import { WorkflowProgressTracker } from '@/components/WorkflowProgressTracker';
-import { WorkflowStepValidator } from '@/components/WorkflowStepValidator';
-import { WorkflowStepTimer } from '@/components/WorkflowStepTimer';
+import { useAdvancedWorkflowState, WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
-import { WorkflowQuickActions } from '@/components/WorkflowQuickActions';
-import { WorkflowStepHistory } from '@/components/WorkflowStepHistory';
-import { WorkflowInsights } from '@/components/WorkflowInsights';
-import { WorkflowNotifications } from '@/components/WorkflowNotifications';
-import { WorkflowPreferences } from '@/components/WorkflowPreferences';
-import { WorkflowTemplateManager } from '@/components/WorkflowTemplateManager';
-import { WorkflowStateSync } from '@/components/WorkflowStateSync';
-import { WorkflowExportImport } from '@/components/WorkflowExportImport';
-import { WorkflowMetricsVisualization } from '@/components/WorkflowMetricsVisualization';
+import {
+  AnalyticsTabContent,
+  CollaborationTabContent,
+  HistoryTabContent,
+  InsightsTabContent,
+  NotificationsTabContent,
+  TemplatesTabContent,
+  WorkflowTabContent
+} from './workflow-tabs';
+import { Insight } from './workflow-tabs/InsightsTabContent';
+import { HistoryEntry } from './workflow-tabs/HistoryTabContent';
+import { Notification } from './workflow-tabs/NotificationsTabContent';
+import { Preference } from './workflow-tabs/CollaborationTabContent';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -41,8 +42,8 @@ export const TroubleshootingWorkflow = ({
   } = useAdvancedWorkflowState(currentStep);
 
   // New state for additional features
-  const [stepHistory, setStepHistory] = useState<any[]>([]);
-  const [insights, setInsights] = useState<any[]>([
+  const [stepHistory, setStepHistory] = useState<HistoryEntry[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([
     {
       id: '1',
       type: 'tip',
@@ -52,7 +53,7 @@ export const TroubleshootingWorkflow = ({
       priority: 'medium'
     }
   ]);
-  const [notifications, setNotifications] = useState<any[]>([
+  const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
       type: 'info',
@@ -63,7 +64,7 @@ export const TroubleshootingWorkflow = ({
       autoHide: true
     }
   ]);
-  const [preferences, setPreferences] = useState<any[]>([
+  const [preferences, setPreferences] = useState<Preference[]>([
     {
       id: 'auto_advance',
       category: 'automation',
@@ -236,71 +237,31 @@ export const TroubleshootingWorkflow = ({
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="workflow" className="space-y-4">
-              {/* Progress Tracker */}
-              <WorkflowProgressTracker 
+            <TabsContent value="workflow">
+              <WorkflowTabContent
                 analytics={analytics}
                 currentStep={currentStep}
+                workflowSteps={workflowSteps}
+                validationErrors={validationErrors}
+                handleStepSkip={handleStepSkip}
+                handleStepAdvance={handleStepAdvance}
+                onStepChange={onStepChange}
+                handleQuickAction={handleQuickAction}
+                validateStep={validateStep}
               />
-              
-              {/* Quick Actions */}
-              <WorkflowQuickActions
-                currentStepId={currentStep}
-                canSkipCurrentStep={workflowSteps.find(s => s.id === currentStep)?.optional || false}
-                canMarkComplete={true}
-                onSkipStep={() => handleStepSkip(currentStep)}
-                onMarkComplete={() => handleStepAdvance(currentStep)}
-                onRestart={() => onStepChange('analyze')}
-                onGetHelp={() => handleQuickAction('get-help')}
-                onShareWorkflow={() => handleQuickAction('share')}
-                onExportProgress={() => handleQuickAction('export')}
-                onViewDocumentation={() => handleQuickAction('docs')}
-              />
-              
-              {/* Workflow Steps */}
-              <div className="space-y-4">
-                <h3 className="font-medium text-slate-800">Workflow Steps</h3>
-                {workflowSteps.map((step, index) => (
-                  <div key={step.id} className="space-y-2">
-                    <WorkflowStepValidator
-                      step={step}
-                      validationErrors={validationErrors[step.id]}
-                      onValidate={validateStep}
-                      onAdvance={handleStepAdvance}
-                      onSkip={step.optional ? handleStepSkip : undefined}
-                    />
-                    
-                    {step.status === 'active' && (
-                      <WorkflowStepTimer
-                        stepId={step.id}
-                        stepTitle={step.title}
-                        isActive={true}
-                        onTimeUpdate={(stepId, time) => console.log('Time update:', stepId, time)}
-                      />
-                    )}
-                    
-                    {index < workflowSteps.length - 1 && (
-                      <div className="flex justify-center py-2">
-                        <div className="w-px h-4 bg-gray-300"></div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
             </TabsContent>
             
             <TabsContent value="insights">
-              <WorkflowInsights
+              <InsightsTabContent
                 insights={insights}
-                currentStepId={currentStep}
-                progressPercent={analytics.progressPercent}
-                averageStepTime={analytics.averageStepTime}
+                currentStep={currentStep}
+                analytics={analytics}
                 onApplyInsight={(id) => console.log('Apply insight:', id)}
               />
             </TabsContent>
             
             <TabsContent value="history">
-              <WorkflowStepHistory
+              <HistoryTabContent
                 history={stepHistory}
                 onRevisitStep={onStepChange}
                 onClearHistory={() => setStepHistory([])}
@@ -308,7 +269,7 @@ export const TroubleshootingWorkflow = ({
             </TabsContent>
             
             <TabsContent value="notifications">
-              <WorkflowNotifications
+              <NotificationsTabContent
                 notifications={notifications}
                 onDismiss={handleNotificationDismiss}
                 onDismissAll={() => setNotifications([])}
@@ -316,43 +277,29 @@ export const TroubleshootingWorkflow = ({
             </TabsContent>
 
             <TabsContent value="templates">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <WorkflowTemplateManager
-                  currentWorkflow={workflowSteps}
-                  onLoadTemplate={handleLoadTemplate}
-                  onSaveAsTemplate={handleSaveAsTemplate}
-                />
-                
-                <WorkflowExportImport
-                  currentWorkflow={workflowSteps}
-                  currentProgress={analytics}
-                  onImportWorkflow={handleImportWorkflow}
-                  onImportProgress={handleImportProgress}
-                />
-              </div>
+              <TemplatesTabContent
+                workflowSteps={workflowSteps}
+                analytics={analytics}
+                onLoadTemplate={handleLoadTemplate}
+                onSaveAsTemplate={handleSaveAsTemplate}
+                onImportWorkflow={handleImportWorkflow}
+                onImportProgress={handleImportProgress}
+              />
             </TabsContent>
 
             <TabsContent value="collaboration">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <WorkflowStateSync
-                  isCollaborationEnabled={isCollaborationEnabled}
-                  currentStepId={currentStep}
-                  onSyncStateChange={handleSyncStateChange}
-                  onConflictResolution={handleConflictResolution}
-                />
-                
-                <WorkflowPreferences
-                  preferences={preferences}
-                  onPreferenceChange={handlePreferenceChange}
-                  onSavePreferences={() => console.log('Save preferences')}
-                  onResetToDefaults={() => console.log('Reset preferences')}
-                  hasUnsavedChanges={false}
-                />
-              </div>
+              <CollaborationTabContent
+                isCollaborationEnabled={isCollaborationEnabled}
+                currentStep={currentStep}
+                onSyncStateChange={handleSyncStateChange}
+                onConflictResolution={handleConflictResolution}
+                preferences={preferences}
+                onPreferenceChange={handlePreferenceChange}
+              />
             </TabsContent>
 
             <TabsContent value="analytics">
-              <WorkflowMetricsVisualization
+              <AnalyticsTabContent
                 metrics={mockMetrics}
                 timeRange={metricsTimeRange}
                 onTimeRangeChange={setMetricsTimeRange}
