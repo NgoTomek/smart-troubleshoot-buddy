@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { ImageUpload } from '@/components/ImageUpload';
-import { ContextForm } from '@/components/ContextForm';
-import { AnalysisProgress } from '@/components/AnalysisProgress';
+import { WorkflowStepsContainer } from '@/components/WorkflowStepsContainer';
 import { useTroubleshootingWorkflow } from '@/hooks/useTroubleshootingWorkflow';
 
 interface TroubleshootingWorkflowSectionProps {
@@ -25,23 +23,11 @@ export const TroubleshootingWorkflowSection = ({
   };
 
   return (
-    <div className="space-y-8 mt-8">
-      <ImageUpload 
-        onImagesUploaded={handleImagesUploaded}
-        extractedText={extractedText}
-      />
-      
-      {extractedText && (
-        <ContextForm 
-          extractedText={extractedText}
-          onSubmit={handleContextFormSubmit}
-          isAnalyzing={isAnalyzing}
-        />
-      )}
-      
-      {isAnalyzing && (
-        <AnalysisProgress isAnalyzing={isAnalyzing} />
-      )}
-    </div>
+    <WorkflowStepsContainer
+      extractedText={extractedText}
+      isAnalyzing={isAnalyzing}
+      onImagesUploaded={handleImagesUploaded}
+      onContextSubmit={handleContextFormSubmit}
+    />
   );
 };
