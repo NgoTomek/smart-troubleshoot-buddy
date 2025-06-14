@@ -17,6 +17,7 @@ import {
   TemplatesTabContent,
   WorkflowTabContent
 } from './workflow-tabs';
+import { generateWorkflowMetrics } from '@/lib/analytics';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
@@ -62,6 +63,7 @@ export const TroubleshootingWorkflow = ({
   } = useWorkflowTabsState(workflowSteps);
 
   const analytics = getAnalytics();
+  const metrics = generateWorkflowMetrics(stepHistory, workflowSteps, metricsTimeRange);
 
   const handleStepAdvance = async (stepId: string) => {
     const success = await advanceToStep(stepId);
@@ -218,7 +220,7 @@ export const TroubleshootingWorkflow = ({
 
             <TabsContent value="analytics">
               <AnalyticsTabContent
-                metrics={mockMetrics}
+                metrics={metrics}
                 timeRange={metricsTimeRange}
                 onTimeRangeChange={setMetricsTimeRange}
               />
