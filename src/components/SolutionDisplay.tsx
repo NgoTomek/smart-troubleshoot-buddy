@@ -6,6 +6,7 @@ import { SolutionManager } from '@/components/SolutionManager';
 import { QuickActions } from '@/components/QuickActions';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
 import { CollaborationNotifications } from '@/components/CollaborationNotifications';
+import { SolutionMetrics } from '@/components/SolutionMetrics';
 import { useSolutionState } from '@/hooks/useSolutionState';
 import { WorkflowManager } from './WorkflowManager';
 import { Solution } from '@/types/solution';
@@ -14,7 +15,6 @@ import { DiagnosticAndCollaborationSection } from './DiagnosticAndCollaborationS
 import { AdvancedSolutionsSection } from './AdvancedSolutionsSection';
 import { SolutionOverviewSection } from './SolutionOverviewSection';
 import { SessionSummarySection } from './SessionSummarySection';
-
 
 interface SolutionDisplayProps {
   solutions: Solution[];
@@ -74,6 +74,9 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         extractedText={extractedText} 
         contextData={contextData} 
       />
+
+      {/* Solution Metrics */}
+      <SolutionMetrics solutions={solutions} completedSteps={completedSteps} />
 
       {/* Workflow and Quality Assessment */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

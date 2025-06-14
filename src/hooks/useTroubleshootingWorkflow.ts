@@ -1,9 +1,9 @@
 
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useNotificationManager } from '@/hooks/useNotificationManager';
 
 export const useTroubleshootingWorkflow = () => {
-  const { toast } = useToast();
+  const { showSuccess, showInfo } = useNotificationManager();
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [extractedText, setExtractedText] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -12,20 +12,15 @@ export const useTroubleshootingWorkflow = () => {
     console.log('Images uploaded:', images);
     setUploadedImages(images);
     
-    toast({
-      title: "Images Uploaded",
-      description: "Extracting text from your images...",
-      duration: 2000,
-    });
+    showInfo("Images Uploaded", "Extracting text from your images...");
     
     // Simulate OCR extraction
     setTimeout(() => {
       setExtractedText('Error: Cannot connect to server. Connection timed out after 30 seconds. Check your network settings and try again.');
-      toast({
-        title: "Text Extracted",
-        description: "Text has been extracted from your images. Please provide additional context.",
-        duration: 3000,
-      });
+      showSuccess(
+        "Text Extracted",
+        "Text has been extracted from your images. Please provide additional context."
+      );
     }, 1500);
   };
 
@@ -33,11 +28,10 @@ export const useTroubleshootingWorkflow = () => {
     console.log('Context submitted:', context);
     setIsAnalyzing(true);
     
-    toast({
-      title: "Analysis Started",
-      description: "Our AI is analyzing your issue and generating solutions...",
-      duration: 3000,
-    });
+    showSuccess(
+      "Analysis Started",
+      "Our AI is analyzing your issue and generating solutions..."
+    );
     
     // Return the analysis promise to be handled by the parent component
     return new Promise((resolve) => {
