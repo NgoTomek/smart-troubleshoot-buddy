@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
@@ -19,6 +20,7 @@ import { TroubleshootingWorkflow } from '@/components/TroubleshootingWorkflow';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
 import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { useSolutionState } from '@/hooks/useSolutionState';
+import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
 
 interface Solution {
   id: number;
@@ -55,7 +57,16 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState(solutions, problemContext);
 
-  const [currentWorkflowStep, setCurrentWorkflowStep] = React.useState('solutions');
+  const {
+    workflowSteps,
+    currentStep,
+    validationErrors,
+    advanceToStep,
+    skipStep,
+    validateStep,
+    getAnalytics,
+  } = useAdvancedWorkflowState('solutions');
+
   const [isCollaborationActive, setIsCollaborationActive] = React.useState(false);
 
   const handleRecommendationUpdate = (recommendations: any[]) => {
@@ -80,8 +91,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
   };
 
   const handleWorkflowStepChange = (stepId: string) => {
-    setCurrentWorkflowStep(stepId);
-    console.log('Workflow step changed to:', stepId);
+    advanceToStep(stepId);
   };
 
   return (
@@ -99,8 +109,14 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
       {/* Workflow and Quality Assessment */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TroubleshootingWorkflow
-          currentStep={currentWorkflowStep}
+          workflowSteps={workflowSteps}
+          currentStep={currentStep}
           onStepChange={handleWorkflowStepChange}
+          validationErrors={validationErrors}
+          advanceToStep={advanceToStep}
+          skipStep={skipStep}
+          validateStep={validateStep}
+          getAnalytics={getAnalytics}
         />
         
         <SolutionQualityAssessment

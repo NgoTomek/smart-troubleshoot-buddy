@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Target } from 'lucide-react';
-import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep, WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
 import { useWorkflowTabsState } from '@/hooks/useWorkflowTabsState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
 import { generateWorkflowMetrics } from '@/lib/analytics';
@@ -12,22 +13,26 @@ import { AIAssistant } from './AIAssistant';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 interface TroubleshootingWorkflowProps {
+  workflowSteps: WorkflowStep[];
   currentStep: string;
   onStepChange: (stepId: string) => void;
+  validationErrors: { [key: string]: string[] };
+  advanceToStep: (stepId: string) => Promise<boolean>;
+  skipStep: (stepId: string) => boolean;
+  validateStep: (stepId: string) => Promise<boolean>;
+  getAnalytics: () => WorkflowAnalytics;
 }
 
 export const TroubleshootingWorkflow = ({ 
   currentStep, 
   onStepChange, 
+  workflowSteps,
+  validationErrors,
+  advanceToStep,
+  skipStep,
+  validateStep,
+  getAnalytics
 }: TroubleshootingWorkflowProps) => {
-  const {
-    workflowSteps,
-    validationErrors,
-    advanceToStep,
-    skipStep,
-    validateStep,
-    getAnalytics
-  } = useAdvancedWorkflowState(currentStep);
 
   const {
     stepHistory,
@@ -58,7 +63,6 @@ export const TroubleshootingWorkflow = ({
   const { handleStepAdvance, handleStepSkip } = useWorkflowActions({
     advanceToStep,
     skipStep,
-    onStepChange,
     addHistoryEntry,
     workflowSteps,
   });

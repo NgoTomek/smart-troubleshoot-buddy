@@ -6,20 +6,17 @@ import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
 export const useWorkflowActions = ({
   advanceToStep,
   skipStep,
-  onStepChange,
   addHistoryEntry,
   workflowSteps,
 }: {
   advanceToStep: (stepId: string) => Promise<boolean>;
   skipStep: (stepId: string) => boolean;
-  onStepChange: (stepId: string) => void;
   addHistoryEntry: (entry: Omit<HistoryEntry, 'timestamp'>) => void;
   workflowSteps: WorkflowStep[];
 }) => {
   const handleStepAdvance = useCallback(async (stepId: string) => {
     const success = await advanceToStep(stepId);
     if (success) {
-      onStepChange(stepId);
       
       const step = workflowSteps.find(s => s.id === stepId);
       if (step) {
@@ -32,7 +29,7 @@ export const useWorkflowActions = ({
       }
     }
     return success;
-  }, [advanceToStep, onStepChange, addHistoryEntry, workflowSteps]);
+  }, [advanceToStep, addHistoryEntry, workflowSteps]);
 
   const handleStepSkip = useCallback((stepId: string) => {
     const success = skipStep(stepId);
@@ -42,11 +39,11 @@ export const useWorkflowActions = ({
         index > currentIndex && step.status === 'pending'
       );
       if (nextStep) {
-        onStepChange(nextStep.id);
+        advanceToStep(nextStep.id);
       }
     }
     return success;
-  }, [skipStep, onStepChange, workflowSteps]);
+  }, [skipStep, workflowSteps, advanceToStep]);
 
   return { handleStepAdvance, handleStepSkip };
 };
