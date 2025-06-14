@@ -1,5 +1,5 @@
 import { HistoryEntry } from '@/components/workflow-tabs/HistoryTabContent';
-import { WorkflowStep } from '@/hooks/useAdvancedWorkflowState';
+import { WorkflowStep, WorkflowAnalytics } from '@/hooks/useAdvancedWorkflowState';
 
 interface StepCompletionTime {
   name: string;
@@ -112,5 +112,49 @@ export const generateWorkflowMetrics = (
     successRates,
     performanceTrends,
     collaborationData,
+  };
+};
+
+export const generateWorkflowAnalytics = (
+  workflowSteps: WorkflowStep[],
+  stepDurations: { [key: string]: number }
+): WorkflowAnalytics => {
+  const totalSteps = workflowSteps.filter(s => !s.optional).length;
+  const completedSteps = workflowSteps.filter(s => s.status === 'completed').length;
+  const skippedSteps = workflowSteps.filter(s => s.status === 'skipped').length;
+  const failedSteps = workflowSteps.filter(s => s.status === 'failed').length;
+  
+  const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  
+  const completedDurations = Object.values(stepDurations);
+  const averageStepTime = completedDurations.length > 0 
+    ? completedDurations.reduce((a, b) => a + b, 0) / completedDurations.length 
+    : 0;
+  
+  const remainingSteps = workflowSteps.filter(s => 
+    s.status === 'pending' || s.status === 'active'
+  ).length;
+  
+  const estimatedTimeRemaining = remainingSteps > 0 
+    ? `${Math.round((remainingSteps * averageStepTime) / 60000)} min`
+    : '0 min';
+
+  // Identify bottleneck steps (steps that took longer than average)
+  const bottleneckSteps = Object.entries(stepDurations)
+    .filter(([_, duration]) => duration > averageStepTime * 1.5)
+    .map(([stepId]) => {
+      const step = workflowSteps.find(s => s.id === stepId);
+      return step?.title || stepId;
+    });
+
+  return {
+    totalSteps,
+    completedSteps,
+    skippedSteps,
+    failedSteps,
+    progressPercent,
+    estimatedTimeRemaining,
+    averageStepTime: Math.round(averageStepTime / 1000), // Convert to seconds
+    bottleneckSteps
   };
 };
