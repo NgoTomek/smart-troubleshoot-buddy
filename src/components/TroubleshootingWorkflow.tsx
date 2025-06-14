@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 interface TroubleshootingWorkflowProps {
   workflowSteps: WorkflowStep[];
   currentStep: string;
-  onStepChange: (stepId: string) => void;
+  onNavigate: (stepId: string) => void;
   validationErrors: { [key: string]: string[] };
   advanceToStep: (stepId: string, skipValidation?: boolean) => Promise<boolean>;
   skipStep: (stepId: string) => boolean;
@@ -25,7 +26,7 @@ interface TroubleshootingWorkflowProps {
 
 export const TroubleshootingWorkflow = ({ 
   currentStep, 
-  onStepChange, 
+  onNavigate, 
   workflowSteps,
   validationErrors,
   advanceToStep,
@@ -93,17 +94,17 @@ export const TroubleshootingWorkflow = ({
           <WorkflowBreadcrumbNav
             steps={workflowSteps}
             currentStepId={currentStep}
-            onStepClick={onStepChange}
+            onStepClick={onNavigate}
             onPrevious={() => {
               const currentIndex = workflowSteps.findIndex(s => s.id === currentStep);
               if (currentIndex > 0) {
-                onStepChange(workflowSteps[currentIndex - 1].id);
+                onNavigate(workflowSteps[currentIndex - 1].id);
               }
             }}
             onNext={() => {
               const currentIndex = workflowSteps.findIndex(s => s.id === currentStep);
               if (currentIndex < workflowSteps.length - 1) {
-                onStepChange(workflowSteps[currentIndex + 1].id);
+                onNavigate(workflowSteps[currentIndex + 1].id);
               }
             }}
           />
@@ -118,7 +119,7 @@ export const TroubleshootingWorkflow = ({
             validationErrors={validationErrors}
             handleStepSkip={handleStepSkip}
             handleStepAdvance={handleStepAdvance}
-            onStepChange={onStepChange}
+            onNavigate={onNavigate}
             handleQuickAction={handleQuickAction}
             validateStep={validateStep}
             insights={insights}

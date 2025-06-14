@@ -6,24 +6,21 @@ import { TroubleshootingWorkflow } from '@/components/TroubleshootingWorkflow';
 export const WorkflowManager = () => {
   const {
     workflowSteps,
-    currentStep,
+    viewedStepId,
     validationErrors,
     stepDurations,
     advanceToStep,
     skipStep,
     validateStep,
     getAnalytics,
+    navigateToStep,
   } = useAdvancedWorkflowState('solutions');
-
-  const handleWorkflowStepChange = (stepId: string) => {
-    advanceToStep(stepId);
-  };
 
   return (
     <TroubleshootingWorkflow
       workflowSteps={workflowSteps}
-      currentStep={currentStep}
-      onStepChange={handleWorkflowStepChange}
+      currentStep={viewedStepId}
+      onNavigate={navigateToStep}
       validationErrors={validationErrors}
       advanceToStep={advanceToStep}
       skipStep={skipStep}

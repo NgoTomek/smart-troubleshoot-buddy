@@ -23,7 +23,7 @@ interface WorkflowTabsProps {
     validationErrors: { [key: string]: string[] };
     handleStepSkip: (stepId: string) => boolean;
     handleStepAdvance: (stepId: string) => Promise<boolean>;
-    onStepChange: (stepId: string) => void;
+    onNavigate: (stepId: string) => void;
     handleQuickAction: (action: string) => void;
     validateStep: (stepId: string) => Promise<boolean>;
     insights: Insight[];
@@ -55,7 +55,7 @@ export const WorkflowTabs = (props: WorkflowTabsProps) => {
         validationErrors,
         handleStepSkip,
         handleStepAdvance,
-        onStepChange,
+        onNavigate,
         handleQuickAction,
         validateStep,
         insights,
@@ -99,7 +99,7 @@ export const WorkflowTabs = (props: WorkflowTabsProps) => {
                 validationErrors={validationErrors}
                 handleStepSkip={handleStepSkip}
                 handleStepAdvance={handleStepAdvance}
-                onStepChange={onStepChange}
+                onNavigate={onNavigate}
                 handleQuickAction={handleQuickAction}
                 validateStep={validateStep}
               />
@@ -117,7 +117,7 @@ export const WorkflowTabs = (props: WorkflowTabsProps) => {
             <TabsContent value="history">
               <HistoryTabContent
                 history={stepHistory}
-                onRevisitStep={onStepChange}
+                onRevisitStep={onNavigate}
                 onClearHistory={handleClearHistory}
               />
             </TabsContent>

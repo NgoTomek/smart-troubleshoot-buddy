@@ -12,7 +12,7 @@ interface WorkflowTabContentProps {
   validationErrors: { [key: string]: string[] };
   handleStepSkip: (stepId: string) => boolean;
   handleStepAdvance: (stepId: string) => Promise<boolean>;
-  onStepChange: (stepId: string) => void;
+  onNavigate: (stepId: string) => void;
   handleQuickAction: (action: string) => void;
   validateStep: (stepId: string) => Promise<boolean>;
 }
@@ -24,7 +24,7 @@ export const WorkflowTabContent = ({
   validationErrors,
   handleStepSkip,
   handleStepAdvance,
-  onStepChange,
+  onNavigate,
   handleQuickAction,
   validateStep,
 }: WorkflowTabContentProps) => {
@@ -41,7 +41,7 @@ export const WorkflowTabContent = ({
         canMarkComplete={true}
         onSkipStep={() => handleStepSkip(currentStep)}
         onMarkComplete={() => handleStepAdvance(currentStep)}
-        onRestart={() => onStepChange('analyze')}
+        onRestart={() => onNavigate('analyze')}
         onGetHelp={() => handleQuickAction('get-help')}
         onShareWorkflow={() => handleQuickAction('share')}
         onExportProgress={() => handleQuickAction('export')}
