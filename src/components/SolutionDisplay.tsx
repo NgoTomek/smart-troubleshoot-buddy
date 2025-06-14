@@ -1,23 +1,20 @@
+
 import React from 'react';
 import { SolutionHeader } from '@/components/SolutionHeader';
 import { ProblemSummary } from '@/components/ProblemSummary';
 import { SolutionManager } from '@/components/SolutionManager';
-import { ProgressSummary } from '@/components/ProgressSummary';
-import { SolutionInsights } from '@/components/SolutionInsights';
 import { QuickActions } from '@/components/QuickActions';
-import { SessionExport } from '@/components/SessionExport';
-import { SolutionCategories } from '@/components/SolutionCategories';
-import { SolutionRecommendationEngine } from '@/components/SolutionRecommendationEngine';
-import { SmartDiagnostics } from '@/components/SmartDiagnostics';
-import { CommunitySolutions } from '@/components/CommunitySolutions';
-import { SolutionEffectivenessTracker } from '@/components/SolutionEffectivenessTracker';
-import { CollaborationPanel } from '@/components/CollaborationPanel';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
 import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { useSolutionState } from '@/hooks/useSolutionState';
 import { WorkflowManager } from './WorkflowManager';
 import { Solution } from '@/types/solution';
 import { AnalyticsSection } from './AnalyticsSection';
+import { DiagnosticAndCollaborationSection } from './DiagnosticAndCollaborationSection';
+import { AdvancedSolutionsSection } from './AdvancedSolutionsSection';
+import { SolutionOverviewSection } from './SolutionOverviewSection';
+import { SessionSummarySection } from './SessionSummarySection';
+
 
 interface SolutionDisplayProps {
   solutions: Solution[];
@@ -97,39 +94,28 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
       />
 
       {/* Collaboration and Diagnostics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CollaborationPanel
-          problemContext={problemContext}
-          onInviteTeam={handleInviteTeam}
-        />
-        
-        <SmartDiagnostics
-          problemText={extractedText}
-          contextData={contextData}
-          onDiagnosticComplete={handleDiagnosticComplete}
-        />
-      </div>
+      <DiagnosticAndCollaborationSection
+        problemContext={problemContext}
+        problemText={extractedText}
+        contextData={contextData}
+        onInviteTeam={handleInviteTeam}
+        onDiagnosticComplete={handleDiagnosticComplete}
+      />
 
-      <SolutionRecommendationEngine
-        currentProblem={problemContext}
+      <AdvancedSolutionsSection
+        problemContext={problemContext}
+        solutions={solutions}
         onRecommendationUpdate={handleRecommendationUpdate}
+        onCommunitySolutionSelect={handleCommunitySolutionSelect}
+        onEffectivenessUpdate={handleEffectivenessUpdate}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SolutionInsights 
-          solutions={solutions}
-          completedSteps={completedSteps}
-          quickFeedback={quickFeedback}
-        />
-        
-        <SolutionCategories solutions={solutions} />
-      </div>
-
-      <CommunitySolutions
-        problemCategory={solutions[0]?.category || 'General'}
-        onSolutionSelect={handleCommunitySolutionSelect}
+      <SolutionOverviewSection
+        solutions={solutions}
+        completedSteps={completedSteps}
+        quickFeedback={quickFeedback}
       />
-
+      
       <QuickActions />
 
       <SolutionManager
@@ -145,26 +131,14 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         problemContext={problemContext}
       />
 
-      <SolutionEffectivenessTracker
+      <SessionSummarySection
         solutions={solutions}
-        onEffectivenessUpdate={handleEffectivenessUpdate}
+        extractedText={extractedText}
+        contextData={contextData}
+        completedSteps={completedSteps}
+        quickFeedback={quickFeedback}
+        submittedFeedback={submittedFeedback}
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ProgressSummary
-          completedSteps={completedSteps}
-          solutionsCount={solutions.length}
-          submittedFeedback={submittedFeedback}
-        />
-        
-        <SessionExport
-          solutions={solutions}
-          extractedText={extractedText}
-          contextData={contextData}
-          completedSteps={completedSteps}
-          quickFeedback={quickFeedback}
-        />
-      </div>
     </div>
   );
 };
