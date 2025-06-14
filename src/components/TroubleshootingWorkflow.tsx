@@ -1,25 +1,24 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Target, Brain } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { useAdvancedWorkflowState } from '@/hooks/useAdvancedWorkflowState';
 import { useWorkflowTabsState } from '@/hooks/useWorkflowTabsState';
 import { WorkflowBreadcrumbNav } from '@/components/WorkflowBreadcrumbNav';
 import { generateWorkflowMetrics } from '@/lib/analytics';
 import { WorkflowTabs } from './WorkflowTabs';
+import { AIAssistant } from './AIAssistant';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 interface TroubleshootingWorkflowProps {
   currentStep: string;
   onStepChange: (stepId: string) => void;
-  problemContext: string;
 }
 
 export const TroubleshootingWorkflow = ({ 
   currentStep, 
   onStepChange, 
-  problemContext 
 }: TroubleshootingWorkflowProps) => {
   const {
     workflowSteps,
@@ -56,37 +55,13 @@ export const TroubleshootingWorkflow = ({
   const analytics = getAnalytics();
   const metrics = generateWorkflowMetrics(stepHistory, workflowSteps, metricsTimeRange);
 
-  const handleStepAdvance = async (stepId: string) => {
-    const success = await advanceToStep(stepId);
-    if (success) {
-      onStepChange(stepId);
-      
-      const step = workflowSteps.find(s => s.id === stepId);
-      if (step) {
-        addHistoryEntry({
-          stepId,
-          stepTitle: step.title,
-          status: 'completed',
-          duration: 30000 // Mock duration
-        });
-      }
-    }
-    return success;
-  };
-
-  const handleStepSkip = (stepId: string) => {
-    const success = skipStep(stepId);
-    if (success) {
-      const currentIndex = workflowSteps.findIndex(s => s.id === stepId);
-      const nextStep = workflowSteps.find((step, index) => 
-        index > currentIndex && step.status === 'pending'
-      );
-      if (nextStep) {
-        onStepChange(nextStep.id);
-      }
-    }
-    return success;
-  };
+  const { handleStepAdvance, handleStepSkip } = useWorkflowActions({
+    advanceToStep,
+    skipStep,
+    onStepChange,
+    addHistoryEntry,
+    workflowSteps,
+  });
 
   return (
     <div className="space-y-6">
@@ -164,15 +139,7 @@ export const TroubleshootingWorkflow = ({
           <Separator />
           
           {/* AI Assistant */}
-          <div className="text-center">
-            <p className="text-sm text-slate-600 mb-3">
-              Need help with any step? Our AI assistant provides contextual guidance.
-            </p>
-            <Button variant="outline" size="sm" onClick={() => handleQuickAction('ai-assistance')}>
-              <Brain className="w-4 h-4 mr-2" />
-              Get AI Assistance
-            </Button>
-          </div>
+          <AIAssistant onQuickAction={handleQuickAction} />
         </CardContent>
       </Card>
     </div>
