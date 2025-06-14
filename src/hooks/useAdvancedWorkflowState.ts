@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { generateWorkflowAnalytics } from '@/lib/analytics';
@@ -6,6 +5,7 @@ import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 import { getInitialWorkflowSteps } from '@/config/workflowConfig';
 import { useWorkflowValidation } from './useWorkflowValidation';
 import { useWorkflowTimers } from './useWorkflowTimers';
+import { useWorkflowNavigation } from './useWorkflowNavigation';
 
 export type { WorkflowStep, WorkflowAnalytics };
 
@@ -18,10 +18,6 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
   const { validationErrors, validateStep } = useWorkflowValidation(workflowSteps);
   const { stepDurations, startStepTimer, endStepTimer } = useWorkflowTimers();
 
-  useEffect(() => {
-    startStepTimer(initialStep);
-  }, [initialStep, startStepTimer]);
-
   const canAdvanceToStep = useCallback((stepId: string): boolean => {
     const step = workflowSteps.find(s => s.id === stepId);
     if (!step?.requirements) return true;
@@ -31,6 +27,18 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
       return reqStep?.status === 'completed';
     });
   }, [workflowSteps]);
+
+  const { navigateToStep: canNavigateToStep } = useWorkflowNavigation(workflowSteps, canAdvanceToStep);
+
+  const navigateToStep = useCallback((stepId: string) => {
+    if (canNavigateToStep(stepId)) {
+      setViewedStepId(stepId);
+    }
+  }, [canNavigateToStep]);
+
+  useEffect(() => {
+    startStepTimer(initialStep);
+  }, [initialStep, startStepTimer]);
 
   const advanceToStep = useCallback(async (stepId: string, skipValidation = false) => {
     const step = workflowSteps.find(s => s.id === stepId);
@@ -95,20 +103,6 @@ export const useAdvancedWorkflowState = (initialStep: string = 'analyze') => {
 
     return true;
   }, [activeStepId, workflowSteps, canAdvanceToStep, validateStep, toast, endStepTimer, startStepTimer]);
-
-  const navigateToStep = useCallback((stepId: string) => {
-    const stepToNavigate = workflowSteps.find(s => s.id === stepId);
-    if (stepToNavigate && (stepToNavigate.status !== 'pending' || canAdvanceToStep(stepId))) {
-      setViewedStepId(stepId);
-    } else {
-        toast({
-            title: "Cannot Navigate",
-            description: "Previous steps must be completed first.",
-            variant: "destructive",
-            duration: 3000,
-        });
-    }
-  }, [workflowSteps, canAdvanceToStep, toast]);
 
   const skipStep = useCallback((stepId: string) => {
     const step = workflowSteps.find(s => s.id === stepId);
