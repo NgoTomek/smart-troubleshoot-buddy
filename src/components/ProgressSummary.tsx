@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { ProgressMetric } from '@/components/ProgressMetric';
 
 interface ProgressSummaryProps {
   completedSteps: {[key: string]: boolean};
@@ -15,24 +16,18 @@ export const ProgressSummary = ({ completedSteps, solutionsCount, submittedFeedb
         <div className="text-center space-y-3">
           <h3 className="font-semibold text-green-800">Your Progress</h3>
           <div className="flex items-center justify-center space-x-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-700">
-                {Object.values(completedSteps).filter(Boolean).length}
-              </div>
-              <div className="text-sm text-green-600">Steps Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-700">
-                {solutionsCount}
-              </div>
-              <div className="text-sm text-green-600">Solutions Available</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-700">
-                {Object.values(submittedFeedback).filter(Boolean).length}
-              </div>
-              <div className="text-sm text-green-600">Feedback Provided</div>
-            </div>
+            <ProgressMetric
+              value={Object.values(completedSteps).filter(Boolean).length}
+              label="Steps Completed"
+            />
+            <ProgressMetric
+              value={solutionsCount}
+              label="Solutions Available"
+            />
+            <ProgressMetric
+              value={Object.values(submittedFeedback).filter(Boolean).length}
+              label="Feedback Provided"
+            />
           </div>
         </div>
       </CardContent>
