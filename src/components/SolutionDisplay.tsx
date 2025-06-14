@@ -9,6 +9,10 @@ import { QuickActions } from '@/components/QuickActions';
 import { AnalysisDashboard } from '@/components/AnalysisDashboard';
 import { SessionExport } from '@/components/SessionExport';
 import { SolutionCategories } from '@/components/SolutionCategories';
+import { SolutionRecommendationEngine } from '@/components/SolutionRecommendationEngine';
+import { SmartDiagnostics } from '@/components/SmartDiagnostics';
+import { CommunitySolutions } from '@/components/CommunitySolutions';
+import { SolutionEffectivenessTracker } from '@/components/SolutionEffectivenessTracker';
 import { useSolutionState } from '@/hooks/useSolutionState';
 
 interface Solution {
@@ -46,6 +50,22 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState(solutions, problemContext);
 
+  const handleRecommendationUpdate = (recommendations: any[]) => {
+    console.log('Updated recommendations:', recommendations);
+  };
+
+  const handleDiagnosticComplete = (results: any) => {
+    console.log('Diagnostic results:', results);
+  };
+
+  const handleCommunitySolutionSelect = (solution: any) => {
+    console.log('Selected community solution:', solution);
+  };
+
+  const handleEffectivenessUpdate = (data: any[]) => {
+    console.log('Effectiveness data updated:', data);
+  };
+
   return (
     <div className="space-y-6">
       <SolutionHeader onStartOver={onStartOver} />
@@ -55,9 +75,22 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         contextData={contextData} 
       />
 
-      <AnalysisDashboard 
-        solutions={solutions}
-        extractedText={extractedText}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AnalysisDashboard 
+          solutions={solutions}
+          extractedText={extractedText}
+        />
+        
+        <SmartDiagnostics
+          problemText={extractedText}
+          contextData={contextData}
+          onDiagnosticComplete={handleDiagnosticComplete}
+        />
+      </div>
+
+      <SolutionRecommendationEngine
+        currentProblem={problemContext}
+        onRecommendationUpdate={handleRecommendationUpdate}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -69,6 +102,11 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         
         <SolutionCategories solutions={solutions} />
       </div>
+
+      <CommunitySolutions
+        problemCategory={solutions[0]?.category || 'General'}
+        onSolutionSelect={handleCommunitySolutionSelect}
+      />
 
       <QuickActions />
 
@@ -83,6 +121,11 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         onToggleDetailedFeedback={toggleDetailedFeedback}
         onFeedbackSubmitted={handleFeedbackSubmitted}
         problemContext={problemContext}
+      />
+
+      <SolutionEffectivenessTracker
+        solutions={solutions}
+        onEffectivenessUpdate={handleEffectivenessUpdate}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
