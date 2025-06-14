@@ -8,6 +8,7 @@ export interface HistoryEntry {
   status: 'completed' | 'skipped' | 'failed';
   timestamp: Date;
   duration: number;
+  notes?: string;
 }
 
 interface HistoryTabContentProps {
