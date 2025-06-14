@@ -23,6 +23,7 @@ interface SolutionListProps {
   onQuickFeedback: (solutionId: number, type: 'helpful' | 'not-helpful') => void;
   onToggleDetailedFeedback: (solutionId: number) => void;
   onFeedbackSubmitted: (solutionId: number, feedback: any) => void;
+  problemContext?: string;
 }
 
 export const SolutionList = ({
@@ -34,7 +35,8 @@ export const SolutionList = ({
   onToggleStep,
   onQuickFeedback,
   onToggleDetailedFeedback,
-  onFeedbackSubmitted
+  onFeedbackSubmitted,
+  problemContext
 }: SolutionListProps) => {
   return (
     <div className="space-y-6">
@@ -51,6 +53,7 @@ export const SolutionList = ({
           onQuickFeedback={onQuickFeedback}
           onToggleDetailedFeedback={onToggleDetailedFeedback}
           onFeedbackSubmitted={onFeedbackSubmitted}
+          problemContext={problemContext}
         />
       ))}
     </div>

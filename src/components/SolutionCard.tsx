@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { FeedbackSystem } from '@/components/FeedbackSystem';
+import { BookmarkSystem } from '@/components/BookmarkSystem';
 import { 
   CheckCircle, 
   Clock, 
@@ -37,6 +38,7 @@ interface SolutionCardProps {
   onQuickFeedback: (solutionId: number, type: 'helpful' | 'not-helpful') => void;
   onToggleDetailedFeedback: (solutionId: number) => void;
   onFeedbackSubmitted: (solutionId: number, feedback: any) => void;
+  problemContext?: string;
 }
 
 export const SolutionCard = ({
@@ -49,7 +51,8 @@ export const SolutionCard = ({
   onToggleStep,
   onQuickFeedback,
   onToggleDetailedFeedback,
-  onFeedbackSubmitted
+  onFeedbackSubmitted,
+  problemContext
 }: SolutionCardProps) => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -99,6 +102,17 @@ export const SolutionCard = ({
                 <span>{Math.round(solution.successRate * 100)}% success rate</span>
               </div>
             </div>
+          </div>
+          
+          <div className="ml-4">
+            <BookmarkSystem
+              solutionId={solution.id}
+              solutionTitle={solution.title}
+              solutionCategory={solution.category}
+              solutionConfidence={solution.confidence}
+              solutionDifficulty={solution.difficulty}
+              problemContext={problemContext}
+            />
           </div>
         </div>
       </CardHeader>

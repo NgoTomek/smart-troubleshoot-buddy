@@ -38,6 +38,11 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState();
 
+  // Create problem context from extracted text and additional context
+  const problemContext = contextData?.additionalContext 
+    ? `${extractedText} - ${contextData.additionalContext}`
+    : extractedText;
+
   return (
     <div className="space-y-6">
       <SolutionHeader onStartOver={onStartOver} />
@@ -65,6 +70,7 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         onQuickFeedback={handleQuickFeedback}
         onToggleDetailedFeedback={toggleDetailedFeedback}
         onFeedbackSubmitted={handleFeedbackSubmitted}
+        problemContext={problemContext}
       />
 
       <ProgressSummary

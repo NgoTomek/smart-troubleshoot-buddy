@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { ImageUpload } from '@/components/ImageUpload';
 import { ContextForm } from '@/components/ContextForm';
 import { SolutionDisplay } from '@/components/SolutionDisplay';
+import { SavedSolutions } from '@/components/SavedSolutions';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -11,7 +11,7 @@ import { FAQSection } from '@/components/FAQSection';
 import { StatsDisplay } from '@/components/StatsDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, HelpCircle, Home } from 'lucide-react';
+import { BarChart3, HelpCircle, Home, Bookmark } from 'lucide-react';
 
 const Index = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -19,7 +19,7 @@ const Index = () => {
   const [contextData, setContextData] = useState<any>(null);
   const [solutions, setSolutions] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [currentView, setCurrentView] = useState<'main' | 'faq' | 'stats'>('main');
+  const [currentView, setCurrentView] = useState<'main' | 'faq' | 'stats' | 'saved'>('main');
 
   const handleImagesUploaded = (images: File[]) => {
     console.log('Images uploaded:', images);
@@ -105,6 +105,17 @@ const Index = () => {
 
   const hasResults = solutions.length > 0;
 
+  if (currentView === 'saved') {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+          <Header />
+          <SavedSolutions onBackToHome={() => setCurrentView('main')} />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   if (currentView === 'faq') {
     return (
       <ErrorBoundary>
@@ -163,8 +174,12 @@ const Index = () => {
             {/* Navigation Tabs */}
             <div className="max-w-4xl mx-auto px-4 mb-8">
               <Tabs defaultValue="troubleshoot" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="troubleshoot">Troubleshoot Issue</TabsTrigger>
+                  <TabsTrigger value="saved" onClick={() => setCurrentView('saved')}>
+                    <Bookmark className="w-4 h-4 mr-2" />
+                    Saved
+                  </TabsTrigger>
                   <TabsTrigger value="faq" onClick={() => setCurrentView('faq')}>
                     <HelpCircle className="w-4 h-4 mr-2" />
                     FAQ
