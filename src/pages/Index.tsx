@@ -14,11 +14,9 @@ const Index = () => {
     extractedText,
     contextData,
     solutions,
-    isAnalyzing,
     currentView,
     setCurrentView,
-    handleImagesUploaded,
-    handleContextSubmitted,
+    handleAnalysisComplete,
     resetToHome,
     hasResults
   } = useAppState();
@@ -44,12 +42,7 @@ const Index = () => {
           <>
             <HeroSection />
             <MainNavigation onViewChange={setCurrentView} />
-            <TroubleshootingTabContent
-              extractedText={extractedText}
-              isAnalyzing={isAnalyzing}
-              onImagesUploaded={handleImagesUploaded}
-              onContextSubmitted={handleContextSubmitted}
-            />
+            <TroubleshootingTabContent onAnalysisComplete={handleAnalysisComplete} />
           </>
         ) : (
           <div className="max-w-6xl mx-auto px-4 py-8">

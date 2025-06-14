@@ -3,27 +3,15 @@ import { useState } from 'react';
 import { Solution } from '@/types/solution';
 
 export const useAppState = () => {
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [extractedText, setExtractedText] = useState<string>('');
   const [contextData, setContextData] = useState<any>(null);
+  const [extractedText, setExtractedText] = useState<string>('');
   const [solutions, setSolutions] = useState<Solution[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentView, setCurrentView] = useState<'main' | 'faq' | 'stats' | 'saved' | 'tools'>('main');
 
-  const handleImagesUploaded = (images: File[]) => {
-    console.log('Images uploaded:', images);
-    setUploadedImages(images);
-    
-    // Simulate OCR extraction
-    setTimeout(() => {
-      setExtractedText('Error: Cannot connect to server. Connection timed out after 30 seconds. Check your network settings and try again.');
-    }, 1500);
-  };
-
-  const handleContextSubmitted = async (context: any) => {
-    console.log('Context submitted:', context);
+  const handleAnalysisComplete = (context: any, text: string) => {
+    console.log('Analysis completed:', { context, text });
     setContextData(context);
-    setIsAnalyzing(true);
+    setExtractedText(text);
     
     // Simulate AI analysis with more realistic timing
     setTimeout(() => {
@@ -79,29 +67,23 @@ export const useAppState = () => {
           successRate: 0.71
         }
       ]);
-      setIsAnalyzing(false);
-    }, 2000);
+    }, 100);
   };
 
   const resetToHome = () => {
-    setUploadedImages([]);
     setExtractedText('');
     setContextData(null);
     setSolutions([]);
-    setIsAnalyzing(false);
     setCurrentView('main');
   };
 
   return {
-    uploadedImages,
     extractedText,
     contextData,
     solutions,
-    isAnalyzing,
     currentView,
     setCurrentView,
-    handleImagesUploaded,
-    handleContextSubmitted,
+    handleAnalysisComplete,
     resetToHome,
     hasResults: solutions.length > 0
   };
