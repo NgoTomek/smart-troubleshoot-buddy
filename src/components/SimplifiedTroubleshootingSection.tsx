@@ -3,13 +3,13 @@ import React from 'react';
 import { SimplifiedWorkflowContainer } from '@/components/SimplifiedWorkflowContainer';
 import { useTroubleshootingWorkflow } from '@/hooks/useTroubleshootingWorkflow';
 
-interface TroubleshootingWorkflowSectionProps {
+interface SimplifiedTroublesho otingSectionProps {
   onAnalysisComplete: (context: any, extractedText: string) => void;
 }
 
-export const TroubleshootingWorkflowSection = ({
+export const SimplifiedTroubleshootingSection = ({
   onAnalysisComplete,
-}: TroubleshootingWorkflowSectionProps) => {
+}: SimplifiedTroubleshootingSectionProps) => {
   const {
     extractedText,
     isAnalyzing,

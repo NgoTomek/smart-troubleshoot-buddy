@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { ImageUpload } from '@/components/ImageUpload';
-import { ContextForm } from '@/components/ContextForm';
-import { AnalysisProgress } from '@/components/AnalysisProgress';
+import { SimplifiedWorkflowContainer } from '@/components/SimplifiedWorkflowContainer';
 
 interface WorkflowStepsContainerProps {
   extractedText: string;
@@ -18,23 +16,11 @@ export const WorkflowStepsContainer = ({
   onContextSubmit,
 }: WorkflowStepsContainerProps) => {
   return (
-    <div className="space-y-8">
-      <ImageUpload 
-        onImagesUploaded={onImagesUploaded}
-        extractedText={extractedText}
-      />
-      
-      {extractedText && (
-        <ContextForm 
-          extractedText={extractedText}
-          onSubmit={onContextSubmit}
-          isAnalyzing={isAnalyzing}
-        />
-      )}
-      
-      {isAnalyzing && (
-        <AnalysisProgress isAnalyzing={isAnalyzing} />
-      )}
-    </div>
+    <SimplifiedWorkflowContainer
+      extractedText={extractedText}
+      isAnalyzing={isAnalyzing}
+      onImagesUploaded={onImagesUploaded}
+      onContextSubmit={onContextSubmit}
+    />
   );
 };

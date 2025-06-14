@@ -5,16 +5,10 @@ import { ProblemSummary } from '@/components/ProblemSummary';
 import { SolutionManager } from '@/components/SolutionManager';
 import { QuickActions } from '@/components/QuickActions';
 import { SolutionQualityAssessment } from '@/components/SolutionQualityAssessment';
-import { CollaborationNotifications } from '@/components/CollaborationNotifications';
 import { SolutionMetrics } from '@/components/SolutionMetrics';
 import { useSolutionState } from '@/hooks/useSolutionState';
-import { WorkflowManager } from './WorkflowManager';
+import { SmartDiagnostics } from './SmartDiagnostics';
 import { Solution } from '@/types/solution';
-import { AnalyticsSection } from './AnalyticsSection';
-import { DiagnosticAndCollaborationSection } from './DiagnosticAndCollaborationSection';
-import { AdvancedSolutionsSection } from './AdvancedSolutionsSection';
-import { SolutionOverviewSection } from './SolutionOverviewSection';
-import { SessionSummarySection } from './SessionSummarySection';
 
 interface SolutionDisplayProps {
   solutions: Solution[];
@@ -40,34 +34,12 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
     toggleStep
   } = useSolutionState(solutions, problemContext);
 
-  const [isCollaborationActive, setIsCollaborationActive] = React.useState(false);
-
-  const handleRecommendationUpdate = (recommendations: any[]) => {
-    console.log('Updated recommendations:', recommendations);
-  };
-
   const handleDiagnosticComplete = (results: any) => {
     console.log('Diagnostic results:', results);
   };
 
-  const handleCommunitySolutionSelect = (solution: any) => {
-    console.log('Selected community solution:', solution);
-  };
-
-  const handleEffectivenessUpdate = (data: any[]) => {
-    console.log('Effectiveness data updated:', data);
-  };
-
-  const handleInviteTeam = () => {
-    setIsCollaborationActive(true);
-    console.log('Inviting team members to collaboration session');
-  };
-
   return (
     <div className="space-y-6">
-      {/* Collaboration Notifications - Fixed Position */}
-      <CollaborationNotifications isCollaborationActive={isCollaborationActive} />
-
       <SolutionHeader onStartOver={onStartOver} />
       
       <ProblemSummary 
@@ -75,52 +47,27 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         contextData={contextData} 
       />
 
-      {/* Solution Metrics */}
+      {/* Solution Metrics Overview */}
       <SolutionMetrics solutions={solutions} completedSteps={completedSteps} />
 
-      {/* Workflow and Quality Assessment */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <WorkflowManager />
-        
-        <SolutionQualityAssessment
-          solutions={solutions}
-          userFeedback={quickFeedback}
-          completedSteps={completedSteps}
-        />
-      </div>
-
-      {/* Enhanced Analytics Row */}
-      <AnalyticsSection
-        solutions={solutions}
-        extractedText={extractedText}
-        problemContext={problemContext}
-      />
-
-      {/* Collaboration and Diagnostics */}
-      <DiagnosticAndCollaborationSection
-        problemContext={problemContext}
+      {/* Smart Diagnostics - Main Diagnostic Feature */}
+      <SmartDiagnostics
         problemText={extractedText}
         contextData={contextData}
-        onInviteTeam={handleInviteTeam}
         onDiagnosticComplete={handleDiagnosticComplete}
       />
 
-      <AdvancedSolutionsSection
-        problemContext={problemContext}
+      {/* Quality Assessment */}
+      <SolutionQualityAssessment
         solutions={solutions}
-        onRecommendationUpdate={handleRecommendationUpdate}
-        onCommunitySolutionSelect={handleCommunitySolutionSelect}
-        onEffectivenessUpdate={handleEffectivenessUpdate}
+        userFeedback={quickFeedback}
+        completedSteps={completedSteps}
       />
 
-      <SolutionOverviewSection
-        solutions={solutions}
-        completedSteps={completedSteps}
-        quickFeedback={quickFeedback}
-      />
-      
+      {/* Quick Actions for Common Fixes */}
       <QuickActions />
 
+      {/* Main Solution Manager */}
       <SolutionManager
         solutions={solutions}
         completedSteps={completedSteps}
@@ -132,15 +79,6 @@ export const SolutionDisplay = ({ solutions, extractedText, contextData, onStart
         onToggleDetailedFeedback={toggleDetailedFeedback}
         onFeedbackSubmitted={handleFeedbackSubmitted}
         problemContext={problemContext}
-      />
-
-      <SessionSummarySection
-        solutions={solutions}
-        extractedText={extractedText}
-        contextData={contextData}
-        completedSteps={completedSteps}
-        quickFeedback={quickFeedback}
-        submittedFeedback={submittedFeedback}
       />
     </div>
   );

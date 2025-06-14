@@ -4,7 +4,7 @@ import { SolutionDisplay } from '@/components/SolutionDisplay';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { MainNavigation } from '@/components/MainNavigation';
+import { SimplifiedMainNavigation } from '@/components/SimplifiedMainNavigation';
 import { ViewLayout } from '@/components/ViewLayout';
 import { useAppState } from '@/hooks/useAppState';
 
@@ -40,7 +40,7 @@ const Index = () => {
         {!hasResults ? (
           <>
             <HeroSection />
-            <MainNavigation onViewChange={setCurrentView} onAnalysisComplete={handleAnalysisComplete} />
+            <SimplifiedMainNavigation onAnalysisComplete={handleAnalysisComplete} />
           </>
         ) : (
           <div className="max-w-6xl mx-auto px-4 py-8">
