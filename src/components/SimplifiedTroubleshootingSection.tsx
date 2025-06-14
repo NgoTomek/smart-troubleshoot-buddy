@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { SimplifiedWorkflowContainer } from '@/components/SimplifiedWorkflowContainer';
 import { useTroubleshootingWorkflow } from '@/hooks/useTroubleshootingWorkflow';
 
-interface SimplifiedTroublesho otingSectionProps {
+interface SimplifiedTroubleshootingSectionProps {
   onAnalysisComplete: (context: any, extractedText: string) => void;
 }
 
