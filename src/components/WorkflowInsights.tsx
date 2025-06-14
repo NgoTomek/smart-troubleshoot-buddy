@@ -1,17 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Lightbulb, 
-  TrendingUp, 
-  Target, 
-  AlertCircle,
-  Star,
-  Clock,
-  Zap
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb, AlertTriangle, Zap, Trophy, TrendingUp, Clock } from 'lucide-react';
 import { Insight } from '@/components/workflow-tabs/InsightsTabContent';
 
 interface WorkflowInsightsProps {
@@ -19,184 +11,156 @@ interface WorkflowInsightsProps {
   currentStepId: string;
   progressPercent: number;
   averageStepTime: number;
-  onApplyInsight?: (insightId: string) => void;
+  onApplyInsight: (id: string) => void;
 }
 
-export const WorkflowInsights = ({ 
-  insights, 
-  currentStepId, 
-  progressPercent, 
+export const WorkflowInsights = ({
+  insights,
+  currentStepId,
+  progressPercent,
   averageStepTime,
-  onApplyInsight 
+  onApplyInsight,
 }: WorkflowInsightsProps) => {
-  const getInsightIcon = (type: string) => {
+  const getInsightIcon = (type: Insight['type']) => {
     switch (type) {
-      case 'tip': return <Lightbulb className="w-4 h-4 text-blue-600" />;
-      case 'warning': return <AlertCircle className="w-4 h-4 text-yellow-600" />;
-      case 'optimization': return <Zap className="w-4 h-4 text-purple-600" />;
-      case 'achievement': return <Star className="w-4 h-4 text-green-600" />;
-      default: return <Target className="w-4 h-4 text-gray-600" />;
+      case 'tip':
+        return <Lightbulb className="w-5 h-5 text-blue-600" />;
+      case 'warning':
+        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      case 'optimization':
+        return <Zap className="w-5 h-5 text-purple-600" />;
+      case 'achievement':
+        return <Trophy className="w-5 h-5 text-green-600" />;
+      default:
+        return <Lightbulb className="w-5 h-5 text-gray-600" />;
     }
   };
 
-  const getInsightColor = (type: string) => {
+  const getInsightColor = (type: Insight['type']) => {
     switch (type) {
-      case 'tip': return 'bg-blue-50 border-blue-200';
-      case 'warning': return 'bg-yellow-50 border-yellow-200';
-      case 'optimization': return 'bg-purple-50 border-purple-200';
-      case 'achievement': return 'bg-green-50 border-green-200';
-      default: return 'bg-gray-50 border-gray-200';
+      case 'tip':
+        return 'bg-blue-50 border-blue-200 text-blue-800';
+      case 'warning':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      case 'optimization':
+        return 'bg-purple-50 border-purple-200 text-purple-800';
+      case 'achievement':
+        return 'bg-green-50 border-green-200 text-green-800';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800';
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    const colors = {
-      high: 'bg-red-100 text-red-700',
-      medium: 'bg-yellow-100 text-yellow-700',
-      low: 'bg-green-100 text-green-700'
-    };
-    return colors[priority as keyof typeof colors] || colors.low;
+  const getPriorityBadgeVariant = (priority: Insight['priority']) => {
+    switch (priority) {
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'default';
+      case 'low':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
   };
 
-  const highPriorityInsights = insights.filter(i => i.priority === 'high');
-  const otherInsights = insights.filter(i => i.priority !== 'high');
+  // Generate automatic insights based on workflow state
+  const automaticInsights: Insight[] = [
+    {
+      id: 'progress-insight',
+      type: progressPercent > 75 ? 'achievement' : progressPercent > 50 ? 'tip' : 'optimization',
+      title: progressPercent > 75 ? 'Great Progress!' : progressPercent > 50 ? 'Halfway There' : 'Getting Started',
+      description: progressPercent > 75 
+        ? 'You\'re almost done! Keep up the excellent work.'
+        : progressPercent > 50 
+        ? 'You\'re making good progress through the workflow.'
+        : 'Take your time and follow each step carefully for best results.',
+      actionable: false,
+      priority: progressPercent > 75 ? 'low' : 'medium'
+    },
+    {
+      id: 'time-insight',
+      type: averageStepTime > 300000 ? 'warning' : 'tip',
+      title: averageStepTime > 300000 ? 'Consider Time Management' : 'Good Pace',
+      description: averageStepTime > 300000 
+        ? 'You\'re spending quite a bit of time on each step. Consider breaking down complex steps.'
+        : 'You\'re maintaining a good pace through the workflow.',
+      actionable: averageStepTime > 300000,
+      priority: averageStepTime > 300000 ? 'medium' : 'low'
+    }
+  ];
+
+  const allInsights = [...insights, ...automaticInsights];
 
   return (
-    <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="w-5 h-5 text-indigo-600" />
-          <span>Workflow Insights</span>
-          <Badge variant="outline" className="bg-indigo-100 text-indigo-700">
-            {insights.length} insights
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Progress Overview */}
-        <div className="p-4 bg-white rounded-lg border border-indigo-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Current Progress</span>
-            <span className="text-sm text-gray-600">{progressPercent}%</span>
-          </div>
-          <Progress value={progressPercent} className="h-2 mb-3" />
-          
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <div className="text-lg font-bold text-indigo-600">
-                {Math.round(averageStepTime)}s
-              </div>
-              <div className="text-xs text-gray-600">Avg Step Time</div>
+    <div className="space-y-4">
+      {/* Workflow Statistics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="w-5 h-5" />
+            <span>Workflow Analytics</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{progressPercent}%</div>
+              <div className="text-sm text-gray-600">Progress</div>
             </div>
-            <div>
-              <div className="text-lg font-bold text-indigo-600">
-                {currentStepId}
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {Math.round(averageStepTime / 1000)}s
               </div>
-              <div className="text-xs text-gray-600">Current Step</div>
+              <div className="text-sm text-gray-600">Avg Step Time</div>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* High Priority Insights */}
-        {highPriorityInsights.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-red-700 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1" />
-              Action Required
-            </h4>
-            {highPriorityInsights.map((insight) => (
-              <div
-                key={insight.id}
-                className={`p-3 rounded-lg border ${getInsightColor(insight.type)}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-2 flex-1">
-                    {getInsightIcon(insight.type)}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h5 className="text-sm font-medium">{insight.title}</h5>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${getPriorityBadge(insight.priority)}`}
-                        >
-                          {insight.priority}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-700">{insight.description}</p>
-                    </div>
-                  </div>
-                  
-                  {insight.actionable && onApplyInsight && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onApplyInsight(insight.id)}
-                      className="ml-2 text-xs h-6"
-                    >
-                      Apply
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Other Insights */}
-        {otherInsights.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-700">
-              Recommendations
-            </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {otherInsights.map((insight) => (
-                <div
-                  key={insight.id}
-                  className={`p-3 rounded-lg border ${getInsightColor(insight.type)}`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-2 flex-1">
+      {/* Insights List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Smart Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {allInsights.length === 0 ? (
+            <div className="text-center py-6">
+              <Lightbulb className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600">No insights available yet</p>
+              <p className="text-sm text-gray-500">Continue working to receive personalized tips</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {allInsights.map((insight) => (
+                <div key={insight.id} className={`p-4 rounded-lg border ${getInsightColor(insight.type)}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center space-x-2">
                       {getInsightIcon(insight.type)}
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h5 className="text-sm font-medium">{insight.title}</h5>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${getPriorityBadge(insight.priority)}`}
-                          >
-                            {insight.priority}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-gray-700">{insight.description}</p>
-                      </div>
+                      <h4 className="font-medium">{insight.title}</h4>
                     </div>
-                    
-                    {insight.actionable && onApplyInsight && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onApplyInsight(insight.id)}
-                        className="ml-2 text-xs h-6"
-                      >
-                        Apply
-                      </Button>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={getPriorityBadgeVariant(insight.priority)}>
+                        {insight.priority}
+                      </Badge>
+                      {insight.actionable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onApplyInsight(insight.id)}
+                        >
+                          Apply
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                  <p className="text-sm">{insight.description}</p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {insights.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
-            <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No insights available yet</p>
-            <p className="text-xs">Complete more steps to get personalized recommendations</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };

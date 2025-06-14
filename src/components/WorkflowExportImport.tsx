@@ -2,60 +2,65 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Download, 
   Upload, 
   FileText, 
   Share2,
   Copy,
-  Check,
-  AlertCircle,
-  QrCode
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { WorkflowStep, WorkflowAnalytics } from '@/types/workflow';
 
 interface WorkflowExportImportProps {
-  currentWorkflow: any;
-  currentProgress: any;
-  onImportWorkflow: (workflow: any) => void;
+  currentWorkflow: WorkflowStep[];
+  currentProgress: WorkflowAnalytics;
+  onImportWorkflow: (workflow: WorkflowStep[]) => void;
   onImportProgress: (progress: any) => void;
 }
 
-export const WorkflowExportImport = ({ 
-  currentWorkflow, 
-  currentProgress, 
-  onImportWorkflow, 
-  onImportProgress 
+export const WorkflowExportImport = ({
+  currentWorkflow,
+  currentProgress,
+  onImportWorkflow,
+  onImportProgress,
 }: WorkflowExportImportProps) => {
-  const { toast } = useToast();
-  const [exportData, setExportData] = useState('');
   const [importData, setImportData] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
+  const [exportData, setExportData] = useState('');
   const [importError, setImportError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [showExportData, setShowExportData] = useState(false);
 
-  const generateExportData = (includeProgress: boolean = false) => {
+  const generateExportData = () => {
     const exportObject = {
       version: '1.0',
       timestamp: new Date().toISOString(),
-      workflow: currentWorkflow,
-      ...(includeProgress && { progress: currentProgress }),
-      metadata: {
-        exportedBy: 'User',
-        description: 'Exported workflow from troubleshooting session'
+      workflow: {
+        steps: currentWorkflow,
+        analytics: currentProgress,
+        metadata: {
+          totalSteps: currentWorkflow.length,
+          completedSteps: currentWorkflow.filter(s => s.status === 'completed').length,
+          exportedBy: 'workflow-system'
+        }
       }
     };
     
     return JSON.stringify(exportObject, null, 2);
   };
 
-  const handleExport = (includeProgress: boolean = false) => {
-    const data = generateExportData(includeProgress);
+  const handleExport = () => {
+    const data = generateExportData();
     setExportData(data);
-    
-    // Download as file
+    setShowExportData(true);
+  };
+
+  const handleDownload = () => {
+    const data = generateExportData();
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -65,243 +70,205 @@ export const WorkflowExportImport = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
-    toast({
-      title: "Workflow Exported",
-      description: "Workflow has been downloaded as JSON file",
-      duration: 3000,
-    });
   };
 
-  const handleCopyToClipboard = async () => {
-    if (!exportData) {
-      const data = generateExportData(true);
-      setExportData(data);
-    }
-    
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(exportData);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      
-      toast({
-        title: "Copied to Clipboard",
-        description: "Workflow data copied to clipboard",
-        duration: 2000,
-      });
-    } catch (error) {
-      toast({
-        title: "Copy Failed",
-        description: "Failed to copy to clipboard",
-        variant: "destructive",
-        duration: 3000,
-      });
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
   const handleImport = () => {
+    setImportError('');
+    
     if (!importData.trim()) {
-      setImportError('Please paste workflow data to import');
+      setImportError('Please enter workflow data to import');
       return;
     }
 
     try {
       const parsed = JSON.parse(importData);
       
-      if (!parsed.workflow) {
-        setImportError('Invalid workflow format: missing workflow data');
+      if (!parsed.workflow || !parsed.workflow.steps) {
+        setImportError('Invalid workflow format: missing steps data');
         return;
       }
 
-      if (parsed.version !== '1.0') {
-        setImportError('Unsupported workflow version');
+      // Validate steps structure
+      const steps = parsed.workflow.steps;
+      if (!Array.isArray(steps)) {
+        setImportError('Invalid workflow format: steps must be an array');
         return;
       }
 
-      onImportWorkflow(parsed.workflow);
+      // Basic validation of step structure
+      const isValidSteps = steps.every(step => 
+        step.id && step.title && step.status
+      );
+
+      if (!isValidSteps) {
+        setImportError('Invalid step format: each step must have id, title, and status');
+        return;
+      }
+
+      onImportWorkflow(steps);
       
-      if (parsed.progress) {
-        onImportProgress(parsed.progress);
+      if (parsed.workflow.analytics) {
+        onImportProgress(parsed.workflow.analytics);
       }
 
       setImportData('');
       setImportError('');
       
-      toast({
-        title: "Workflow Imported",
-        description: "Workflow has been successfully imported",
-        duration: 3000,
-      });
-    } catch (error) {
-      setImportError('Invalid JSON format');
+      // Show success message
+      setTimeout(() => {
+        alert('Workflow imported successfully!');
+      }, 100);
+      
+    } catch (err) {
+      setImportError('Invalid JSON format. Please check your data.');
     }
   };
 
-  const handleGenerateShareUrl = () => {
-    const data = generateExportData(false);
-    const encoded = btoa(data);
-    const url = `${window.location.origin}${window.location.pathname}?workflow=${encoded}`;
-    setShareUrl(url);
+  const handleShare = () => {
+    const data = generateExportData();
+    const encodedData = encodeURIComponent(data);
+    const shareUrl = `${window.location.origin}?import=${encodedData}`;
     
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "Share URL Generated",
-      description: "Share URL copied to clipboard",
-      duration: 3000,
-    });
-  };
-
-  const getDataSize = (data: string) => {
-    const bytes = new Blob([data]).size;
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Workflow Export',
+        text: 'Check out this workflow configuration',
+        url: shareUrl
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert('Share URL copied to clipboard!');
+      });
+    }
   };
 
   return (
-    <Card className="bg-purple-50 border-purple-200">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Share2 className="w-5 h-5 text-purple-600" />
-          <span>Export & Import</span>
-          <Badge variant="outline" className="bg-purple-100 text-purple-700">
-            Workflow Sharing
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* Export Section */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-slate-900 flex items-center space-x-2">
-            <Download className="w-4 h-4 text-purple-600" />
+    <div className="space-y-6">
+      {/* Export Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Download className="w-5 h-5" />
             <span>Export Workflow</span>
-          </h4>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Export your current workflow configuration and progress to share or backup.
+          </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => handleExport(false)}
-              className="text-purple-600 border-purple-300"
-            >
+          <div className="flex space-x-2">
+            <Button onClick={handleExport} variant="outline">
               <FileText className="w-4 h-4 mr-2" />
-              Export Workflow Only
+              Generate Export
             </Button>
-            
-            <Button
-              variant="outline"
-              onClick={() => handleExport(true)}
-              className="text-purple-600 border-purple-300"
-            >
+            <Button onClick={handleDownload}>
               <Download className="w-4 h-4 mr-2" />
-              Export with Progress
+              Download JSON
+            </Button>
+            <Button onClick={handleShare} variant="outline">
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={handleCopyToClipboard}
-              className="text-purple-600 border-purple-300"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 mr-2 text-green-600" />
-              ) : (
-                <Copy className="w-4 h-4 mr-2" />
-              )}
-              Copy to Clipboard
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleGenerateShareUrl}
-              className="text-purple-600 border-purple-300"
-            >
-              <QrCode className="w-4 h-4 mr-2" />
-              Generate Share URL
-            </Button>
-          </div>
-
-          {exportData && (
-            <div className="p-3 bg-white rounded-lg border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Export Preview</span>
-                <Badge variant="outline" className="text-xs">
-                  {getDataSize(exportData)}
-                </Badge>
+          {showExportData && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Export Data</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCopy}
+                  className="flex items-center space-x-1"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </Button>
               </div>
               <Textarea
-                value={exportData.substring(0, 200) + '...'}
+                value={exportData}
                 readOnly
-                className="text-xs font-mono"
-                rows={4}
+                rows={8}
+                className="font-mono text-xs"
               />
             </div>
           )}
+        </CardContent>
+      </Card>
 
-          {shareUrl && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center space-x-2 text-blue-800 mb-1">
-                <QrCode className="w-4 h-4" />
-                <span className="text-sm font-medium">Share URL Generated</span>
-              </div>
-              <p className="text-xs text-blue-700 break-all font-mono bg-white p-2 rounded border">
-                {shareUrl}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-purple-200" />
-
-        {/* Import Section */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-slate-900 flex items-center space-x-2">
-            <Upload className="w-4 h-4 text-purple-600" />
+      {/* Import Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Upload className="w-5 h-5" />
             <span>Import Workflow</span>
-          </h4>
-          
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Paste exported workflow JSON data here..."
-              value={importData}
-              onChange={(e) => {
-                setImportData(e.target.value);
-                setImportError('');
-              }}
-              className="font-mono text-sm"
-              rows={6}
-            />
-            
-            {importError && (
-              <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm flex items-center space-x-2">
-                <AlertCircle className="w-4 h-4" />
-                <span>{importError}</span>
-              </div>
-            )}
-            
-            <Button
-              onClick={handleImport}
-              disabled={!importData.trim()}
-              className="w-full"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Import Workflow
-            </Button>
-          </div>
-        </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Import a previously exported workflow configuration to restore your progress.
+          </p>
 
-        {/* Format Info */}
-        <div className="p-3 bg-purple-100 rounded-lg">
-          <h5 className="text-sm font-medium text-purple-800 mb-1">Export Format</h5>
-          <ul className="text-xs text-purple-700 space-y-1">
-            <li>• JSON format with version information</li>
-            <li>• Includes workflow steps and metadata</li>
-            <li>• Optional progress and completion status</li>
-            <li>• Compatible with future versions</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+          {importError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{importError}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="import-data">Workflow Data (JSON)</Label>
+            <Textarea
+              id="import-data"
+              value={importData}
+              onChange={(e) => setImportData(e.target.value)}
+              placeholder="Paste your exported workflow JSON data here..."
+              rows={8}
+              className="font-mono text-xs"
+            />
+          </div>
+
+          <Button 
+            onClick={handleImport}
+            disabled={!importData.trim()}
+            className="w-full"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Import Workflow
+          </Button>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <h4 className="font-medium text-blue-800 mb-1">Import Guidelines</h4>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• Only import data from trusted sources</li>
+              <li>• Importing will replace your current workflow</li>
+              <li>• Make sure to export your current workflow first if needed</li>
+              <li>• The data must be in valid JSON format</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

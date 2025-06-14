@@ -1,202 +1,142 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Bell, 
-  X, 
   CheckCircle, 
   AlertTriangle, 
-  Info,
+  Info, 
   Clock,
-  BellOff
+  X,
+  Trash2
 } from 'lucide-react';
-
-interface WorkflowNotification {
-  id: string;
-  type: 'success' | 'warning' | 'info' | 'reminder';
-  title: string;
-  message: string;
-  timestamp: Date;
-  actionable: boolean;
-  action?: {
-    label: string;
-    handler: () => void;
-  };
-  autoHide?: boolean;
-  duration?: number;
-}
+import { Notification } from '@/components/workflow-tabs/NotificationsTabContent';
 
 interface WorkflowNotificationsProps {
-  notifications: WorkflowNotification[];
+  notifications: Notification[];
   onDismiss: (id: string) => void;
   onDismissAll: () => void;
-  maxVisible?: number;
 }
 
-export const WorkflowNotifications = ({ 
-  notifications, 
-  onDismiss, 
+export const WorkflowNotifications = ({
+  notifications,
+  onDismiss,
   onDismissAll,
-  maxVisible = 3 
 }: WorkflowNotificationsProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    // Auto-hide notifications with autoHide: true
-    notifications.forEach(notification => {
-      if (notification.autoHide) {
-        const duration = notification.duration || 5000;
-        const timer = setTimeout(() => {
-          onDismiss(notification.id);
-        }, duration);
-        
-        return () => clearTimeout(timer);
-      }
-    });
-  }, [notifications, onDismiss]);
-
-  const getNotificationIcon = (type: string) => {
+  const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'success': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
-      case 'info': return <Info className="w-4 h-4 text-blue-600" />;
-      case 'reminder': return <Clock className="w-4 h-4 text-purple-600" />;
-      default: return <Bell className="w-4 h-4 text-gray-600" />;
+      case 'success':
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'warning':
+        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      case 'info':
+        return <Info className="w-5 h-5 text-blue-600" />;
+      case 'reminder':
+        return <Clock className="w-5 h-5 text-purple-600" />;
+      default:
+        return <Info className="w-5 h-5 text-gray-600" />;
     }
   };
 
-  const getNotificationColor = (type: string) => {
+  const getNotificationColor = (type: Notification['type']) => {
     switch (type) {
-      case 'success': return 'border-l-green-500 bg-green-50';
-      case 'warning': return 'border-l-yellow-500 bg-yellow-50';
-      case 'info': return 'border-l-blue-500 bg-blue-50';
-      case 'reminder': return 'border-l-purple-500 bg-purple-50';
-      default: return 'border-l-gray-500 bg-gray-50';
+      case 'success':
+        return 'bg-green-50 border-green-200';
+      case 'warning':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'info':
+        return 'bg-blue-50 border-blue-200';
+      case 'reminder':
+        return 'bg-purple-50 border-purple-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
     }
   };
 
   const formatTimestamp = (timestamp: Date) => {
     const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    const minutes = Math.floor(diff / 60000);
-    
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    const diffMs = now.getTime() - timestamp.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
     return timestamp.toLocaleDateString();
   };
 
-  const visibleNotifications = isExpanded 
-    ? notifications 
-    : notifications.slice(0, maxVisible);
-  
-  const hiddenCount = notifications.length - maxVisible;
-
   if (notifications.length === 0) {
     return (
-      <Card className="border-gray-200 bg-gray-50">
-        <CardContent className="p-4 text-center">
-          <BellOff className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-500">No notifications</p>
+      <Card>
+        <CardContent className="py-8 text-center">
+          <CheckCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+          <p className="text-gray-600">No notifications</p>
+          <p className="text-sm text-gray-500">All caught up! You'll see workflow updates here.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-blue-200 bg-blue-50">
-      <CardContent className="p-4 space-y-3">
-        {/* Header */}
+    <Card>
+      <CardHeader>
         <div className="flex items-center justify-between">
+          <CardTitle>Notifications</CardTitle>
           <div className="flex items-center space-x-2">
-            <Bell className="w-5 h-5 text-blue-600" />
-            <h3 className="font-medium text-blue-800">Notifications</h3>
-            <Badge variant="outline" className="bg-blue-100 text-blue-700">
-              {notifications.length}
-            </Badge>
+            <Badge variant="outline">{notifications.length}</Badge>
+            {notifications.length > 0 && (
+              <Button variant="outline" size="sm" onClick={onDismissAll}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All
+              </Button>
+            )}
           </div>
-          
-          {notifications.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onDismissAll}
-              className="text-blue-600 text-xs h-6"
-            >
-              Clear All
-            </Button>
-          )}
         </div>
-
-        {/* Notifications List */}
-        <div className="space-y-2">
-          {visibleNotifications.map((notification) => (
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-3 border-l-4 rounded-r-lg ${getNotificationColor(notification.type)} 
-                         transition-all duration-300 hover:shadow-sm`}
+              className={`p-4 rounded-lg border ${getNotificationColor(notification.type)}`}
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-2 flex-1">
+                <div className="flex items-start space-x-3 flex-1">
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h4 className="text-sm font-medium truncate">
-                        {notification.title}
-                      </h4>
-                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                    <h4 className="font-medium text-sm">{notification.title}</h4>
+                    <p className="text-sm text-gray-700 mt-1">{notification.message}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-gray-500">
                         {formatTimestamp(notification.timestamp)}
                       </span>
+                      {notification.action && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={notification.action.handler}
+                        >
+                          {notification.action.label}
+                        </Button>
+                      )}
                     </div>
-                    <p className="text-xs text-gray-700 leading-relaxed">
-                      {notification.message}
-                    </p>
-                    
-                    {notification.actionable && notification.action && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={notification.action.handler}
-                        className="mt-2 text-xs h-6"
-                      >
-                        {notification.action.label}
-                      </Button>
-                    )}
                   </div>
                 </div>
-                
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onDismiss(notification.id)}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                  className="ml-2 flex-shrink-0"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Show More/Less Button */}
-        {notifications.length > maxVisible && (
-          <div className="text-center pt-2 border-t border-blue-200">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-blue-600 text-xs"
-            >
-              {isExpanded 
-                ? 'Show Less' 
-                : `Show ${hiddenCount} More`
-              }
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -2,13 +2,34 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
+import { TrendingUp, Clock, Target, Activity } from 'lucide-react';
 
 interface WorkflowMetricsVisualizationProps {
-  metrics: any;
+  metrics: {
+    completionRate: number;
+    averageTime: number;
+    stepDistribution: Array<{ name: string; value: number; color: string }>;
+    timelineData: Array<{ step: string; duration: number; status: string }>;
+    trends: Array<{ date: string; completions: number; avgTime: number }>;
+  };
   timeRange: '7d' | '30d' | '90d';
-  onTimeRangeChange: (timeRange: '7d' | '30d' | '90d') => void;
+  onTimeRangeChange: (range: '7d' | '30d' | '90d') => void;
 }
 
 export const WorkflowMetricsVisualization = ({
@@ -16,77 +37,224 @@ export const WorkflowMetricsVisualization = ({
   timeRange,
   onTimeRangeChange,
 }: WorkflowMetricsVisualizationProps) => {
-  const chartData = [
-    { name: 'Completed', value: metrics?.completedSteps || 0 },
-    { name: 'Skipped', value: metrics?.skippedSteps || 0 },
-    { name: 'Failed', value: metrics?.failedSteps || 0 },
-  ];
+  const formatDuration = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  };
+
+  const getTimeRangeLabel = (range: string) => {
+    switch (range) {
+      case '7d': return 'Last 7 Days';
+      case '30d': return 'Last 30 Days';
+      case '90d': return 'Last 90 Days';
+      default: return 'Last 7 Days';
+    }
+  };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Time Range Selector */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Workflow Metrics</h3>
-        <Select value={timeRange} onValueChange={onTimeRangeChange}>
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <h3 className="text-lg font-semibold">Workflow Analytics</h3>
+        <div className="flex space-x-2">
+          {(['7d', '30d', '90d'] as const).map((range) => (
+            <Button
+              key={range}
+              variant={timeRange === range ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onTimeRangeChange(range)}
+            >
+              {getTimeRangeLabel(range)}
+            </Button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Success Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {metrics?.successRate || 0}%
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Target className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-medium">Completion Rate</span>
             </div>
+            <div className="text-2xl font-bold text-green-600">{metrics.completionRate}%</div>
+            <Progress value={metrics.completionRate} className="h-2 mt-2" />
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Avg. Completion Time</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Clock className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium">Avg Time</span>
+            </div>
             <div className="text-2xl font-bold text-blue-600">
-              {Math.round((metrics?.averageCompletionTime || 0) / 1000)}s
+              {formatDuration(metrics.averageTime)}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Total Sessions</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Activity className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-medium">Active Steps</span>
+            </div>
             <div className="text-2xl font-bold text-purple-600">
-              {metrics?.totalSessions || 0}
+              {metrics.stepDistribution.length}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-orange-600" />
+              <span className="text-sm font-medium">Efficiency</span>
+            </div>
+            <div className="text-2xl font-bold text-orange-600">
+              {Math.round((metrics.completionRate / 100) * (300000 / metrics.averageTime) * 100)}%
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Step Duration Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Step Duration Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={metrics.timelineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="step" />
+                <YAxis tickFormatter={(value) => formatDuration(value)} />
+                <Tooltip 
+                  formatter={(value: number) => [formatDuration(value), 'Duration']}
+                  labelFormatter={(label) => `Step: ${label}`}
+                />
+                <Bar dataKey="duration" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Step Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Step Status Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={metrics.stepDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {metrics.stepDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Trend Analysis */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Performance Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={metrics.trends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Line 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="completions" 
+                  stroke="#10B981" 
+                  strokeWidth={2}
+                  name="Completions"
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="avgTime" 
+                  stroke="#F59E0B" 
+                  strokeWidth={2}
+                  name="Avg Time (ms)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed Insights */}
       <Card>
         <CardHeader>
-          <CardTitle>Step Completion Overview</CardTitle>
+          <CardTitle>Performance Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h4 className="font-medium">Efficiency Metrics</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Fastest Step</span>
+                  <Badge variant="outline">
+                    {metrics.timelineData.length > 0 
+                      ? metrics.timelineData.reduce((prev, current) => 
+                          prev.duration < current.duration ? prev : current
+                        ).step
+                      : 'N/A'
+                    }
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Slowest Step</span>
+                  <Badge variant="outline">
+                    {metrics.timelineData.length > 0 
+                      ? metrics.timelineData.reduce((prev, current) => 
+                          prev.duration > current.duration ? prev : current
+                        ).step
+                      : 'N/A'
+                    }
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-medium">Recommendations</h4>
+              <div className="space-y-2 text-sm text-gray-700">
+                {metrics.completionRate < 80 && (
+                  <p>• Consider simplifying steps with low completion rates</p>
+                )}
+                {metrics.averageTime > 300000 && (
+                  <p>• Break down longer steps into smaller, manageable tasks</p>
+                )}
+                <p>• Review step dependencies to optimize workflow flow</p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
